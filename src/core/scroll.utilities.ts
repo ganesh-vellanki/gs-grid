@@ -67,6 +67,10 @@ export class ScrollUtilities {
         const scrollContainer = this.getGridScrollContainer();
         const viewportContainer = this.getGridViewport();
 
+        if (!scrollContainer || !viewportContainer) {
+            return;
+        }
+
         scrollContainer.addEventListener("touchstart", this.dragStartCallback, false);
         document.addEventListener("touchend", this.dragEndCallback, false);
         document.addEventListener("touchmove", this.dragCallback, false);
@@ -94,6 +98,10 @@ export class ScrollUtilities {
     unRegisterSmartScrollEvents(): void {
         const scrollContainer = this.getGridScrollContainer();
         const viewportContainer = this.getGridViewport();
+
+        if (!scrollContainer || !viewportContainer) {
+            return;
+        }
 
         scrollContainer.removeEventListener("touchstart", this.dragStartCallback, false);
         document.removeEventListener("touchend", this.dragEndCallback, false);
@@ -132,7 +140,8 @@ export class ScrollUtilities {
         this.isScrollBarActivated = false;
         this.resetScrollVisibility();
         const scrollBar = this.getGridScrollBar();
-        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, scrollBar.getBoundingClientRect().y, this.yMax));
+        const trackBottom = Math.max(this.yMin, this.yMax - this.scrollBarHeight);
+        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, scrollBar.getBoundingClientRect().y, trackBottom));
     }
 
     /**
@@ -177,7 +186,8 @@ export class ScrollUtilities {
 
         if (this.isPositionInBounds(nextPosition)) {
             scrollBar.style.top = nextPosition - this.yMin + 'px';
-            this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, this.yMax));
+            const trackBottom = Math.max(this.yMin, this.yMax - this.scrollBarHeight);
+            this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, trackBottom));
         }
     }
 
