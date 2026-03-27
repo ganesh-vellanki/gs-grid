@@ -16,10 +16,15 @@ export class Virtualize {
     private dataSet: any[];
 
     /**
+     * Last rendered start index.
+     */
+    private lastStartIndex: number;
+
+    /**
      * Gets rows per index.
      */
     private get rowsPerIndex(): number {
-        return this.availableGridHeight / this.gridConfig.rowHeight;
+        return Math.max(1, Math.floor(this.availableGridHeight / this.gridConfig.rowHeight));
     }
 
     /**
@@ -27,10 +32,18 @@ export class Virtualize {
      * @param gridConfig grid configuration.
      * @param shadowRoot shadow root.
      */
-    constructor(private gridConfig: IGridConfig, private shadowRoot: ShadowRoot) {
+    constructor(
+        private gridConfig: IGridConfig,
+        private shadowRoot: ShadowRoot,
+        private renderViewportRows: (rows: any[]) => void
+    ) {
         this.availableGridHeight = 200;
         this.dataSet = [...this.gridConfig.data];
+        this.lastStartIndex = -1;
         this.setGridHeight();
+
+        // Render the first page when virtualization starts.
+        this.renderViewportRows(this.getDataSetForIndex(0));
     }
 
     /**
@@ -38,14 +51,28 @@ export class Virtualize {
      * @param scrollYPos scroll position.
      */
     public OnGridScrollPositionChange(scrollYPos: IGridScrollPosition) {
+        if (!scrollYPos) {
+            return;
+        }
+
+        const yPercent = Math.max(0, Math.min(100, scrollYPos.getYPercent()));
+        const maxStartIndex = Math.max(0, this.dataSet.length - this.rowsPerIndex);
+        const startIndex = Math.floor((yPercent / 100) * maxStartIndex);
+
+        if (startIndex === this.lastStartIndex) {
+            return;
+        }
+
+        this.lastStartIndex = startIndex;
+        this.renderViewportRows(this.getDataSetForIndex(startIndex));
     }
 
     /**
      * Gets data set for index.
      */
     private getDataSetForIndex(scrollIndex: number) {
-        const index = scrollIndex * this.rowsPerIndex;
-        return this.dataSet.slice(index, index + this.rowsPerIndex);
+        const boundedIndex = Math.max(0, Math.min(scrollIndex, this.dataSet.length));
+        return this.dataSet.slice(boundedIndex, boundedIndex + this.rowsPerIndex);
     }
 
     /**

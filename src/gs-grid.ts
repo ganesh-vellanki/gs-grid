@@ -182,7 +182,8 @@ export class GsGrid extends HTMLElement {
      * Initializes viewport.
      */
     private initializeViewport() {
-        this.dataRowRenderer.renderIntoViewport({data: this.gridConfig.data});
+        const initialRows = Math.max(1, Math.floor(200 / this.gridConfig.rowHeight));
+        this.dataRowRenderer.renderIntoViewport({data: this.gridConfig.data.slice(0, initialRows)});
     }
 
     /**
@@ -209,7 +210,13 @@ export class GsGrid extends HTMLElement {
      * Initializes virtualization.
      */
     private initializeVirtualization() {
-        this.virtualizationCore = new Virtualize(this.gridConfig, this.shadowRoot);
+        this.virtualizationCore = new Virtualize(
+            this.gridConfig,
+            this.shadowRoot,
+            (rows: any[]) => {
+                (this.dataRowRenderer as FlexDataRowRenderer).updateViewportRows({ data: rows });
+            }
+        );
     }
 
     /**

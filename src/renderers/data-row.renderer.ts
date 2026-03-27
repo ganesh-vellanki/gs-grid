@@ -48,30 +48,45 @@ export class FlexDataRowRenderer implements IGridRenderer {
         }
     }
 
-    updateViewportRowsUp(renderOptions?: any): void {
+    /**
+     * Updates viewport with the provided data set.
+     * @param renderOptions render options.
+     */
+    updateViewportRows(renderOptions?: any): void {
         const viewport = this.shadowRoot.querySelector('.data-viewport');
 
-        if (viewport.innerHTML.length > 0) {
+        if (viewport) {
+            const smartScroll = viewport.querySelector('.smart-scroll');
             viewport.classList.add('scrolling-viewport');
-            viewport.innerHTML = this.renderNewRows(renderOptions.data);
+            viewport.innerHTML = this.renderNewRows(renderOptions ? renderOptions.data : []);
+            if (smartScroll) {
+                viewport.prepend(smartScroll);
+            }
             viewport.classList.remove('scrolling-viewport');
         }
     }
 
+    updateViewportRowsUp(renderOptions?: any): void {
+        this.updateViewportRows(renderOptions);
+    }
+
     updateViewportRowsDown(renderOptions: any): void {
+        this.updateViewportRows(renderOptions);
     }
 
     renderNewRows(data: any[]) {
-        let colTemplate = '';
+        let rowTemplate = '';
         if(data && data.length > 0) {
             data.forEach(dataRow => {
+                let colTemplate = '';
                 this._renderCols.forEach(col => {
                     colTemplate += this.cellTemplateFragmentFn(col.field, dataRow);
                 });
+                rowTemplate += this.rowTemplateFragmentFn(colTemplate).outerHTML;
             });
         }
 
-        return colTemplate;
+        return rowTemplate;
     }
 
     /**
