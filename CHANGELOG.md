@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1-alpha.4](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.3...v0.0.1-alpha.4) (2026-03-28)
+
+
+### Features
+
+* Add virutalize data rows (Merge pull request [#8](https://github.com/ganesh-vellanki/gs-grid/issues/8) from ganesh-vellanki/feat/virutalize-data-rows) ([b6b618f](https://github.com/ganesh-vellanki/gs-grid/commit/b6b618faccb7163bde195d5d8eee6dce7b0b7a35))
+
 ### 0.0.1-alpha.3 (2026-03-28)
 
 
