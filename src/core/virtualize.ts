@@ -21,6 +21,11 @@ export class Virtualize {
     private lastStartIndex: number;
 
     /**
+     * Resize observer for viewport dimension changes.
+     */
+    private resizeObserver: any;
+
+    /**
      * Gets rows per index.
      */
     private get rowsPerIndex(): number {
@@ -37,10 +42,10 @@ export class Virtualize {
         private shadowRoot: ShadowRoot,
         private renderViewportRows: (rows: any[]) => void
     ) {
-        this.availableGridHeight = 200;
         this.dataSet = [...this.gridConfig.data];
         this.lastStartIndex = -1;
         this.setGridHeight();
+        this.observeViewportResize();
 
         // Render the first page when virtualization starts.
         this.renderViewportRows(this.getDataSetForIndex(0));
@@ -80,7 +85,11 @@ export class Virtualize {
      */
     private setGridHeight() {
         const viewport = this.getViewport();
-        viewport.style.height = `${this.availableGridHeight}px`;
+        if (viewport) {
+            this.availableGridHeight = viewport.clientHeight || 200;
+        } else {
+            this.availableGridHeight = 200;
+        }
     }
 
     /**
@@ -89,5 +98,27 @@ export class Virtualize {
      */
     private getViewport(): HTMLElement {
         return this.shadowRoot.querySelector('.data-viewport');
+    }
+
+    /**
+     * Observes viewport resize and recalculates virtualization.
+     */
+    private observeViewportResize() {
+        const viewport = this.getViewport();
+        
+        if (!viewport || typeof (window as any).ResizeObserver === 'undefined') {
+            return;
+        }
+
+        this.resizeObserver = new (window as any).ResizeObserver(() => {
+            this.setGridHeight();
+            
+            // Re-render current page with new rowsPerIndex based on resized height
+            if (this.lastStartIndex >= 0) {
+                this.renderViewportRows(this.getDataSetForIndex(this.lastStartIndex));
+            }
+        });
+
+        this.resizeObserver.observe(viewport);
     }
 }

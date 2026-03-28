@@ -69,6 +69,7 @@ export class GsGrid extends HTMLElement {
     connectedCallback() {
         this.initPropsFromAttrs();
         this.attachShadow({mode: 'open'});
+        window.addEventListener('resize', () => this.onWindowResize());
     }
 
     /**
@@ -182,8 +183,49 @@ export class GsGrid extends HTMLElement {
      * Initializes viewport.
      */
     private initializeViewport() {
-        const initialRows = Math.max(1, Math.floor(200 / this.gridConfig.rowHeight));
-        this.dataRowRenderer.renderIntoViewport({data: this.gridConfig.data.slice(0, initialRows)});
+        // Render only the first page of data
+        const defaultVisibleRows = 3;
+        const initialData = this.gridConfig.data.slice(0, defaultVisibleRows);
+        this.dataRowRenderer.renderIntoViewport({data: initialData});
+        
+        // Get header height and calculate viewport height from available space
+        const headerRow = this.shadowRoot.querySelector('.header-row') as HTMLElement;
+        const headerHeight = headerRow ? headerRow.getBoundingClientRect().height : this.gridConfig.rowHeight;
+        
+        // Use window height minus offset, or fall back to grid's clientHeight
+        const availableHeight = window.innerHeight - 100;
+        const gridHeight = this.clientHeight > 0 ? this.clientHeight : availableHeight;
+        this.updateViewportHeight(gridHeight, headerHeight);
+    }
+
+    /**
+     * Updates viewport height (called on resize and initial setup).
+     */
+    private updateViewportHeight(gridHeight: number, headerHeight: number) {
+        const viewportHeight = Math.max(this.gridConfig.rowHeight, gridHeight - headerHeight - 100);
+        
+        const viewport = this.shadowRoot.querySelector('.data-viewport') as HTMLElement;
+        if (viewport) {
+            viewport.style.height = `${viewportHeight}px`;
+            viewport.style.overflow = 'hidden';
+        }
+    }
+
+    /**
+     * Handles window resize to recalculate viewport height.
+     */
+    private onWindowResize() {
+        if (!this.gridConfig) {
+            return;
+        }
+
+        const headerRow = this.shadowRoot.querySelector('.header-row') as HTMLElement;
+        const headerHeight = headerRow ? headerRow.getBoundingClientRect().height : this.gridConfig.rowHeight;
+        
+        const availableHeight = window.innerHeight - 100;
+        const gridHeight = this.clientHeight > 0 ? this.clientHeight : availableHeight;
+        
+        this.updateViewportHeight(gridHeight, headerHeight);
     }
 
     /**
@@ -210,6 +252,14 @@ export class GsGrid extends HTMLElement {
      * Initializes virtualization.
      */
     private initializeVirtualization() {
+        // Ensure viewport height is set before virtualization
+        const viewport = this.shadowRoot.querySelector('.data-viewport') as HTMLElement;
+        if (viewport && !viewport.style.height) {
+            const defaultVisibleRows = 3;
+            const viewportHeight = defaultVisibleRows * this.gridConfig.rowHeight;
+            viewport.style.height = `${viewportHeight}px`;
+        }
+        
         this.virtualizationCore = new Virtualize(
             this.gridConfig,
             this.shadowRoot,
