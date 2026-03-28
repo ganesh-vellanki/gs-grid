@@ -1,4 +1,4 @@
-# gs-grid ![gs-grid-CI](https://github.com/ganesh-vellanki/gs-grid/workflows/gs-grid-CI/badge.svg) ![gs-grid-cid](https://github.com/ganesh-vellanki/gs-grid/workflows/gs-grid-cid/badge.svg)
+# gs-grid [![gs-grid-ci](https://github.com/ganesh-vellanki/gs-grid/actions/workflows/gs-grid-ci.yml/badge.svg)](https://github.com/ganesh-vellanki/gs-grid/actions/workflows/gs-grid-ci.yml) [![gs-grid-cid](https://github.com/ganesh-vellanki/gs-grid/actions/workflows/gs-grid-cid.yml/badge.svg)](https://github.com/ganesh-vellanki/gs-grid/actions/workflows/gs-grid-cid.yml) 
 
 ### __A new grid for evolving web.__
 #### _Built with web components & it's framework agnostic._

@@ -1,6 +1,8 @@
 name: gs-grid-ci
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   test:
@@ -14,6 +16,11 @@ jobs:
     steps:
       - name: Setup repo
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
