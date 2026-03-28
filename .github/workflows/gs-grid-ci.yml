@@ -1,3 +1,9 @@
+name: gs-grid-ci
+
+on:
+  push:
+  pull_request:
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -20,7 +26,7 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: ${{ matrix.deno }}
-
+      
       - name: Install & Build
         run: |
           yarn clean
