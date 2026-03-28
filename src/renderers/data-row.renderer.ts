@@ -1,27 +1,21 @@
 import { CellUtilities } from "../core";
-import { IGridRenderColumn, IGridRenderer } from "../interface";
+import { IGridConfig, IGridRenderColumn, IGridRenderer } from "../interface";
 
 /**
  * Flex data row renderer.
  */
 export class FlexDataRowRenderer implements IGridRenderer {
     /**
-     * Render cols of flex column renderer.
-     */
-    private _renderCols: IGridRenderColumn[];
-
-    /**
-     * Cell utils of flex header renderer.
-     */
-    private _cellUtils: CellUtilities;
-    
-    /**
      * Creates an instance of flex column renderer.
      * @param columns grid columns.
+     * @param cellUtils cell utilities.
+     * @param gridConfig grid config.
      */
-    constructor(columns: IGridRenderColumn[], cellUtils: CellUtilities) {
-        this._renderCols = columns;
-        this._cellUtils = cellUtils;
+    constructor(private _renderCols: IGridRenderColumn[], 
+                private _cellUtils: CellUtilities, 
+                private gridConfig: IGridConfig,
+                private shadowRoot: ShadowRoot) 
+    {
     }
 
     /**
@@ -45,6 +39,57 @@ export class FlexDataRowRenderer implements IGridRenderer {
     }
 
     /**
+     * Renders into viewport.
+     * @param [renderOptions] render options.
+     */
+    renderIntoViewport(renderOptions?: any): void {
+        if (this.shadowRoot) {
+            this.shadowRoot.append(this.render({ data: this.gridConfig.data }));
+        }
+    }
+
+    /**
+     * Updates viewport with the provided data set.
+     * @param renderOptions render options.
+     */
+    updateViewportRows(renderOptions?: any): void {
+        const viewport = this.shadowRoot.querySelector('.data-viewport');
+
+        if (viewport) {
+            const smartScroll = viewport.querySelector('.smart-scroll');
+            viewport.classList.add('scrolling-viewport');
+            viewport.innerHTML = this.renderNewRows(renderOptions ? renderOptions.data : []);
+            if (smartScroll) {
+                viewport.prepend(smartScroll);
+            }
+            viewport.classList.remove('scrolling-viewport');
+        }
+    }
+
+    updateViewportRowsUp(renderOptions?: any): void {
+        this.updateViewportRows(renderOptions);
+    }
+
+    updateViewportRowsDown(renderOptions: any): void {
+        this.updateViewportRows(renderOptions);
+    }
+
+    renderNewRows(data: any[]) {
+        let rowTemplate = '';
+        if(data && data.length > 0) {
+            data.forEach(dataRow => {
+                let colTemplate = '';
+                this._renderCols.forEach(col => {
+                    colTemplate += this.cellTemplateFragmentFn(col.field, dataRow);
+                });
+                rowTemplate += this.rowTemplateFragmentFn(colTemplate).outerHTML;
+            });
+        }
+
+        return rowTemplate;
+    }
+
+    /**
      * Queues render async.
      * @returns render.
      */
@@ -61,7 +106,7 @@ export class FlexDataRowRenderer implements IGridRenderer {
     private cellTemplateFragmentFn(field: string, data: any): string {
         const cellUtils = this._cellUtils.getCellUtilsByFieldName(field);
         const cellValue = this.getCellValue(field, data);
-        return `<div title="${cellValue}" class="cell-column" style="width: ${cellUtils.renderWidth}"><div class="cell-content">${cellValue}</div></div>`;
+        return `<div title="${cellValue}" class="cell-column" style="width: ${cellUtils.renderWidth}; height: ${this.gridConfig.rowHeight}px"><div class="cell-content">${cellValue}</div></div>`;
     }
 
     /**

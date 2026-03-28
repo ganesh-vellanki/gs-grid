@@ -1,3 +1,7 @@
+import { BehaviorSubject } from "rxjs";
+import { IGridScrollPosition } from "../interface";
+import { GridScrollPosition } from "../model/grid-scroll-position";
+
 /**
  * Scroll utilities.
  */
@@ -43,11 +47,23 @@ export class ScrollUtilities {
     private dragCallback = (event: MouseEvent) => {this.drag(event)};
 
     /**
+     * Scroll move complete publisher.
+     */
+    public scrollMoveComplete$: BehaviorSubject<IGridScrollPosition>;
+
+    /**
+     * Buffered wheel delta for smooth scroll movement.
+     */
+    private wheelDeltaBuffer: number;
+
+    /**
      * Creates an instance of scroll utilities.
      */
     constructor(shadowRoot: ShadowRoot) {
         this.shadowRoot = shadowRoot;
         this.setScrollBounds();
+        this.wheelDeltaBuffer = 0;
+        this.scrollMoveComplete$ = new BehaviorSubject<IGridScrollPosition>(new GridScrollPosition(0, 0, 100));
     }
 
     /**
@@ -56,6 +72,10 @@ export class ScrollUtilities {
     registerSmartScrollEvents(): void {
         const scrollContainer = this.getGridScrollContainer();
         const viewportContainer = this.getGridViewport();
+
+        if (!scrollContainer || !viewportContainer) {
+            return;
+        }
 
         scrollContainer.addEventListener("touchstart", this.dragStartCallback, false);
         document.addEventListener("touchend", this.dragEndCallback, false);
@@ -84,6 +104,10 @@ export class ScrollUtilities {
     unRegisterSmartScrollEvents(): void {
         const scrollContainer = this.getGridScrollContainer();
         const viewportContainer = this.getGridViewport();
+
+        if (!scrollContainer || !viewportContainer) {
+            return;
+        }
 
         scrollContainer.removeEventListener("touchstart", this.dragStartCallback, false);
         document.removeEventListener("touchend", this.dragEndCallback, false);
@@ -121,6 +145,9 @@ export class ScrollUtilities {
     dragEnd(event: MouseEvent): void {
         this.isScrollBarActivated = false;
         this.resetScrollVisibility();
+        const scrollBar = this.getGridScrollBar();
+        const currentY = this.getClampedY(scrollBar.getBoundingClientRect().y);
+        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, currentY, this.yMax));
     }
 
     /**
@@ -129,14 +156,13 @@ export class ScrollUtilities {
      */
     drag(event: MouseEvent): void {
         if((event.type === "touchmove" || event.type === 'mousemove') 
-            && this.isScrollBarActivated
-            && this.isPositionInBounds(event.clientY)) 
-        {
+            && this.isScrollBarActivated) {
             event.preventDefault();
             event.stopImmediatePropagation();
             const scrollBar = this.getGridScrollBar();
-            const relativeY = event.clientY - this.yMin;
-            scrollBar.style.top = relativeY + 'px';
+            const nextPosition = this.getClampedY(event.clientY);
+            scrollBar.style.top = (nextPosition - this.yMin) + 'px';
+            this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, this.yMax));
         }
     }
 
@@ -146,26 +172,32 @@ export class ScrollUtilities {
      */
     onScrollContainerWheel(event: WheelEvent): void {
         this.setScrollBounds();
-        const scrollTarget = (event.target as HTMLElement);
       
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        const isPositiveRoll = event.deltaY > 0;
-        const scrollStep = 10;
-        let nextPosition = 0;
         const scrollBar = this.getGridScrollBar();
-        const scrollBarTop = scrollBar.getBoundingClientRect().y;
+        const currentPosition = this.getClampedY(scrollBar.getBoundingClientRect().y);
+        let nextPosition = currentPosition;
 
-        if (isPositiveRoll) {
-            nextPosition = scrollBarTop + scrollStep;
-        } else {
-            nextPosition = scrollBarTop - scrollStep;
+        // Reduce sensitivity and accumulate sub-pixel deltas for natural wheel/trackpad feel.
+        const sensitivity = 0.2;
+        this.wheelDeltaBuffer += event.deltaY * sensitivity;
+
+        const pixelDelta = this.wheelDeltaBuffer > 0
+            ? Math.floor(this.wheelDeltaBuffer)
+            : Math.ceil(this.wheelDeltaBuffer);
+
+        if (pixelDelta === 0) {
+            return;
         }
 
-        if (this.isPositionInBounds(nextPosition)) {
-            scrollBar.style.top = nextPosition - this.yMin + 'px';
-        }
+        this.wheelDeltaBuffer -= pixelDelta;
+        nextPosition = currentPosition + pixelDelta;
+
+        nextPosition = this.getClampedY(nextPosition);
+        scrollBar.style.top = (nextPosition - this.yMin) + 'px';
+        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, this.yMax));
     }
 
     /**
@@ -178,7 +210,11 @@ export class ScrollUtilities {
         this.setScrollBounds();
         this.enableSmoothScroll();
         this.setScrollVisibility();
-        this.drag(new MouseEvent('mousemove', event));
+        
+        const scrollBar = this.getGridScrollBar();
+        const targetY = this.getClampedY(event.clientY - (this.scrollBarHeight / 2));
+        scrollBar.style.top = (targetY - this.yMin) + 'px';
+        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, targetY, this.yMax));
         this.isScrollBarActivated = false;
         this.disableSmoothScroll();
         this.resetScrollVisibility();
@@ -210,7 +246,16 @@ export class ScrollUtilities {
      * @returns true if in bounds.
      */
     private isPositionInBounds(yPosition: number) {
-        return (yPosition >= this.yMin) && (yPosition + this.scrollBarHeight <= this.yMax);
+        return (yPosition >= this.yMin) && (yPosition <= this.yMax);
+    }
+
+    /**
+     * Clamps a y position to scrollbar track bounds.
+     * @param yPosition y position.
+     * @returns clamped y.
+     */
+    private getClampedY(yPosition: number): number {
+        return Math.max(this.yMin, Math.min(yPosition, this.yMax));
     }
 
     /**
@@ -219,9 +264,13 @@ export class ScrollUtilities {
     private setScrollBounds() {
         const elementContainer = this.getGridScrollContainer();
         const scrollBar = this.getGridScrollBar();
+        if (!elementContainer || !scrollBar) {
+            return;
+        }
+
         this.yMin = elementContainer.getBoundingClientRect().top;
-        this.yMax = elementContainer.getBoundingClientRect().bottom;
         this.scrollBarHeight = scrollBar.getBoundingClientRect().height;
+        this.yMax = Math.max(this.yMin, elementContainer.getBoundingClientRect().bottom - this.scrollBarHeight);
     }
 
     /**

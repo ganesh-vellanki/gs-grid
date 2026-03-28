@@ -1,5 +1,5 @@
-import { CellUtilities } from "./core";
-import { IGridConfig, IGridRenderer } from "./interface";
+import { CellUtilities, Virtualize } from "./core";
+import { IGridConfig, IGridRenderer, IGridScrollPosition } from "./interface";
 import { GridColumn } from "./model";
 import { FlexHeaderRenderer, FlexDataRowRenderer, ScrollRenderer } from "./renderers";
 import { ScrollUtilities } from './core';
@@ -49,12 +49,18 @@ export class GsGrid extends HTMLElement {
     private cellUtils: CellUtilities;
 
     /**
+     * Virtualization core of gs grid.
+     */
+    private virtualizationCore: Virtualize;
+
+    /**
      * Creates an instance of gs-grid.
      */
     constructor() {
         super();
         this.instanceId = this.generateInstanceId();
         this.registerGridEventCallback();
+        this._currentScrollIndex = 0;
     }
 
     /**
@@ -63,6 +69,7 @@ export class GsGrid extends HTMLElement {
     connectedCallback() {
         this.initPropsFromAttrs();
         this.attachShadow({mode: 'open'});
+        window.addEventListener('resize', () => this.onWindowResize());
     }
 
     /**
@@ -129,15 +136,26 @@ export class GsGrid extends HTMLElement {
         this.initializeScrollBar();
 
         // Init smart scroll.
+        // TODO: move smart scroll reg to new method.
+        // TODO: Use Rxjs & remove timeout.
         var smartScroll = new ScrollUtilities(this.shadowRoot);
         setTimeout(() => {
             smartScroll.registerSmartScrollEvents();
         }, 2000);
+
+        // Init virtualization core.
+        // TODO: Use Rxjs & remove timeout.
+        setTimeout(() => {
+            this.initializeVirtualization();
+            smartScroll.scrollMoveComplete$.subscribe((scrollPosition: IGridScrollPosition) => {
+                this.virtualizationCore.OnGridScrollPositionChange(scrollPosition);
+            });
+        }, 500);
     }
 
     /**
      * Registers renderers of header & column of grid.
-     * @param gridConfig 
+     * @param gridConfig grid configuration.
      */
     registerRenderers(gridConfig: IGridConfig) {
         const rendererDataSet = gridConfig.columnDefs.map(x => {
@@ -145,10 +163,10 @@ export class GsGrid extends HTMLElement {
         });
 
         // Register header renderer.
-        this.headerRenderer = new FlexHeaderRenderer(rendererDataSet, this.cellUtils);
+        this.headerRenderer = new FlexHeaderRenderer(rendererDataSet, this.cellUtils, this.gridConfig);
 
         // Register data row renderer.
-        this.dataRowRenderer = new FlexDataRowRenderer(rendererDataSet, this.cellUtils);
+        this.dataRowRenderer = new FlexDataRowRenderer(rendererDataSet, this.cellUtils, this.gridConfig, this.shadowRoot);
 
         // Register viewport scroll renderer.
         this.scrollRenderer = new ScrollRenderer();
@@ -165,7 +183,49 @@ export class GsGrid extends HTMLElement {
      * Initializes viewport.
      */
     private initializeViewport() {
-        this.shadowRoot.append(this.dataRowRenderer.render({ data: this.gridConfig.data }));
+        // Render only the first page of data
+        const defaultVisibleRows = 3;
+        const initialData = this.gridConfig.data.slice(0, defaultVisibleRows);
+        this.dataRowRenderer.renderIntoViewport({data: initialData});
+        
+        // Get header height and calculate viewport height from available space
+        const headerRow = this.shadowRoot.querySelector('.header-row') as HTMLElement;
+        const headerHeight = headerRow ? headerRow.getBoundingClientRect().height : this.gridConfig.rowHeight;
+        
+        // Use window height minus offset, or fall back to grid's clientHeight
+        const availableHeight = window.innerHeight - 100;
+        const gridHeight = this.clientHeight > 0 ? this.clientHeight : availableHeight;
+        this.updateViewportHeight(gridHeight, headerHeight);
+    }
+
+    /**
+     * Updates viewport height (called on resize and initial setup).
+     */
+    private updateViewportHeight(gridHeight: number, headerHeight: number) {
+        const viewportHeight = Math.max(this.gridConfig.rowHeight, gridHeight - headerHeight - 100);
+        
+        const viewport = this.shadowRoot.querySelector('.data-viewport') as HTMLElement;
+        if (viewport) {
+            viewport.style.height = `${viewportHeight}px`;
+            viewport.style.overflow = 'hidden';
+        }
+    }
+
+    /**
+     * Handles window resize to recalculate viewport height.
+     */
+    private onWindowResize() {
+        if (!this.gridConfig) {
+            return;
+        }
+
+        const headerRow = this.shadowRoot.querySelector('.header-row') as HTMLElement;
+        const headerHeight = headerRow ? headerRow.getBoundingClientRect().height : this.gridConfig.rowHeight;
+        
+        const availableHeight = window.innerHeight - 100;
+        const gridHeight = this.clientHeight > 0 ? this.clientHeight : availableHeight;
+        
+        this.updateViewportHeight(gridHeight, headerHeight);
     }
 
     /**
@@ -174,7 +234,7 @@ export class GsGrid extends HTMLElement {
     private initializeScrollBar() {
         const viewport = this.shadowRoot.querySelector('.data-viewport');
         if (viewport) {
-            viewport.append(this.scrollRenderer.render());
+            viewport.prepend(this.scrollRenderer.render());
         }
     }
 
@@ -186,6 +246,27 @@ export class GsGrid extends HTMLElement {
         const gsGridStyles = require('./styles/gs-grid.scss').default[0][1];
         styleRoot.innerText = gsGridStyles.replace(/\n|\r/g, "");
         this.shadowRoot.appendChild(styleRoot);
+    }
+
+    /**
+     * Initializes virtualization.
+     */
+    private initializeVirtualization() {
+        // Ensure viewport height is set before virtualization
+        const viewport = this.shadowRoot.querySelector('.data-viewport') as HTMLElement;
+        if (viewport && !viewport.style.height) {
+            const defaultVisibleRows = 3;
+            const viewportHeight = defaultVisibleRows * this.gridConfig.rowHeight;
+            viewport.style.height = `${viewportHeight}px`;
+        }
+        
+        this.virtualizationCore = new Virtualize(
+            this.gridConfig,
+            this.shadowRoot,
+            (rows: any[]) => {
+                (this.dataRowRenderer as FlexDataRowRenderer).updateViewportRows({ data: rows });
+            }
+        );
     }
 
     /**
