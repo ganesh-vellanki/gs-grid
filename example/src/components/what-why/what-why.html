@@ -3,3 +3,89 @@
         <h3>What & Why</h3>
     </div>
 </div>
+
+<div class="row mt-3">
+    <div class="col-12 col-lg-10">
+        <p class="lead mb-2">
+            <span class="text-primary">gs-grid</span> is a lightweight grid built as a
+            <strong>Web Component</strong>, so it can run in plain JavaScript, Knockout,
+            React, Angular, Vue, or any app that can render custom elements.
+        </p>
+        <p class="text-muted mb-0">
+            The goal is simple: fast rendering, easy setup, and framework-agnostic integration.
+        </p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-primary">What It Gives You</h5>
+                <ul class="mb-0">
+                    <li>Custom-element grid tag: <code>&lt;gs-grid&gt;</code></li>
+                    <li>Column definitions with flexible width options</li>
+                    <li>Configurable row height and nested field access (e.g. <code>company.name</code>)</li>
+                    <li>Shadow DOM style isolation for predictable rendering</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 mt-3 mt-md-0">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-success">Why This Approach</h5>
+                <ul class="mb-0">
+                    <li>No framework lock-in for teams with mixed stacks</li>
+                    <li>Event-driven setup keeps usage straightforward</li>
+                    <li>Virtualized row rendering keeps large datasets responsive</li>
+                    <li>Custom smart scroll behavior supports drag, click, and wheel</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h5>How It Works</h5>
+        <ol class="mb-0">
+            <li>Render <code>&lt;gs-grid&gt;</code> in your page.</li>
+            <li>Create a <code>GridConfig</code> with <code>columnDefs</code>, <code>rowHeight</code>, and <code>data</code>.</li>
+            <li>Dispatch configuration using <code>GridEvents.setupGridConfig(instanceId, config)</code>.</li>
+            <li>The component renders header, viewport rows, and custom scrollbar inside Shadow DOM.</li>
+            <li>Scroll position is mapped to virtual row windows for efficient updates.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h5>Best Fit</h5>
+        <p class="mb-2">gs-grid is currently a strong fit for:</p>
+        <ul class="mb-0">
+            <li>Internal tools and dashboards</li>
+            <li>Apps that need a custom-grid experience without heavy dependencies</li>
+            <li>Teams that want to evolve grid features incrementally</li>
+        </ul>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h5>Changelog Summary</h5>
+        <p class="text-muted mb-3">Latest release: <strong>0.0.1-alpha.3</strong> (2026-03-28)</p>
+
+        <div class="alert alert-light border" role="alert">
+            <h6 class="mb-2">Highlights</h6>
+            <ul class="mb-0">
+                <li>Virtual scrolling behavior improved with better position mapping and grid height calculation.</li>
+                <li>Example/demo app expanded with updated docs routes and refreshed navigation links.</li>
+                <li>Demo data setup improved, including higher row volume and column width examples.</li>
+                <li>Core grid rendering and scroll/virtualization integration matured across multiple updates.</li>
+            </ul>
+        </div>
+    </div>
+</div>

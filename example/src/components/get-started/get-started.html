@@ -3,3 +3,68 @@
         <h3>Get started</h3>
     </div>
 </div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h5>Prerequisites</h5>
+        <ul>
+            <li>Node.js 14+ and Yarn 1.x</li>
+            <li>A browser with Web Components support</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <h5>Run locally</h5>
+        <ol>
+            <li>Install dependencies</li>
+            <li>Build source and docs</li>
+            <li>Start demo server</li>
+        </ol>
+        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-warning">yarn install
+yarn start</code></pre>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <h5>Install in your app</h5>
+        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-warning">yarn add @gs-grid/gs-grid</code></pre>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <h5>Add grid element</h5>
+        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-info">&lt;gs-grid&gt;&lt;/gs-grid&gt;</code></pre>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <h5>Configure columns and data</h5>
+        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-info">import { GridConfig, GridEvents } from '@gs-grid/gs-grid/dist/model';
+
+const gridConfig = new GridConfig();
+gridConfig.rowHeight = 32;
+gridConfig.columnDefs = [
+  { field: 'name', headerName: 'Name' },
+  { field: 'email', headerName: 'Email' },
+  { field: 'company.name', headerName: 'Company', width: 180 }
+];
+gridConfig.data = data;
+
+const gridEl = document.querySelector('gs-grid');
+GridEvents.setupGridConfig(gridEl.getAttribute('instance-id'), gridConfig);</code></pre>
+    </div>
+</div>
+
+<div class="row mt-3 mb-4">
+    <div class="col-12">
+        <h5>Useful scripts</h5>
+        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-warning">yarn build
+yarn dev
+yarn clean</code></pre>
+    </div>
+</div>
