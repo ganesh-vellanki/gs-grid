@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1-alpha.5](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.4...v0.0.1-alpha.5) (2026-03-29)
+
+
+### Features
+
+* **demo:** Update demo to use sorting. ([3ae4a91](https://github.com/ganesh-vellanki/gs-grid/commit/3ae4a91eac8a960b2ab81fc631fa59db1af7db48))
+* **gs-grid:** Add sorting feature ([fa616b3](https://github.com/ganesh-vellanki/gs-grid/commit/fa616b34df4ab643ce9e20e78829171d692f7603))
+
 ### [0.0.1-alpha.4](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.3...v0.0.1-alpha.4) (2026-03-28)
 
 
