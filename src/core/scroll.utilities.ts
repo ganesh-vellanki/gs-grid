@@ -34,17 +34,27 @@ export class ScrollUtilities {
     /**
      * Drag start callback of scroll utilities.
      */
-    private dragStartCallback = (event:MouseEvent) => { this.dragStart(event) };
+    private dragStartCallback = (event: MouseEvent | TouchEvent) => { this.dragStart(event) };
 
     /**
      * Drag end callback of scroll utilities.
      */
-    private dragEndCallback = (event: MouseEvent) => {this.dragEnd(event)};
+    private dragEndCallback = (event: MouseEvent | TouchEvent) => {this.dragEnd(event)};
 
     /**
      * Drag callback of scroll utilities.
      */
-    private dragCallback = (event: MouseEvent) => {this.drag(event)};
+    private dragCallback = (event: MouseEvent | TouchEvent) => {this.drag(event)};
+
+    /**
+     * Touch start callback for viewport swipe scrolling.
+     */
+    private viewportTouchStartCallback = (event: TouchEvent) => { this.onViewportTouchStart(event) };
+
+    /**
+     * Touch move callback for viewport swipe scrolling.
+     */
+    private viewportTouchMoveCallback = (event: TouchEvent) => { this.onViewportTouchMove(event) };
 
     /**
      * Scroll move complete publisher.
@@ -57,12 +67,18 @@ export class ScrollUtilities {
     private wheelDeltaBuffer: number;
 
     /**
+     * Last touch y for viewport swipe scrolling.
+     */
+    private lastViewportTouchY: number;
+
+    /**
      * Creates an instance of scroll utilities.
      */
     constructor(shadowRoot: ShadowRoot) {
         this.shadowRoot = shadowRoot;
         this.setScrollBounds();
         this.wheelDeltaBuffer = 0;
+        this.lastViewportTouchY = null;
         this.scrollMoveComplete$ = new BehaviorSubject<IGridScrollPosition>(new GridScrollPosition(0, 0, 100));
     }
 
@@ -96,6 +112,9 @@ export class ScrollUtilities {
         viewportContainer.onwheel = (event: WheelEvent) => {
             this.onScrollContainerWheel(event);
         };
+
+        viewportContainer.addEventListener('touchstart', this.viewportTouchStartCallback, { passive: true });
+        viewportContainer.addEventListener('touchmove', this.viewportTouchMoveCallback, { passive: false });
     }
 
     /**
@@ -120,13 +139,15 @@ export class ScrollUtilities {
         scrollContainer.onclick = null;
         scrollContainer.onwheel = null;
         viewportContainer.onwheel = null;
+        viewportContainer.removeEventListener('touchstart', this.viewportTouchStartCallback);
+        viewportContainer.removeEventListener('touchmove', this.viewportTouchMoveCallback);
     }
 
     /**
      * Drags start event.
      * @param event Mouse event.
      */
-    dragStart(event: MouseEvent): void {
+    dragStart(event: MouseEvent | TouchEvent): void {
         if (event.type === "touchstart" || event.type === 'mousedown') {
             this.setScrollBounds();
             this.setScrollVisibility();
@@ -142,8 +163,9 @@ export class ScrollUtilities {
      * Drags end event.
      * @param event Mouse event.
      */
-    dragEnd(event: MouseEvent): void {
+    dragEnd(event: MouseEvent | TouchEvent): void {
         this.isScrollBarActivated = false;
+        this.lastViewportTouchY = null;
         this.resetScrollVisibility();
         const scrollBar = this.getGridScrollBar();
         const currentY = this.getClampedY(scrollBar.getBoundingClientRect().y);
@@ -154,16 +176,43 @@ export class ScrollUtilities {
      * Drags scroll utilities.
      * @param event Mouse event.
      */
-    drag(event: MouseEvent): void {
+    drag(event: MouseEvent | TouchEvent): void {
         if((event.type === "touchmove" || event.type === 'mousemove') 
             && this.isScrollBarActivated) {
             event.preventDefault();
             event.stopImmediatePropagation();
             const scrollBar = this.getGridScrollBar();
-            const nextPosition = this.getClampedY(event.clientY);
+            const nextPosition = this.getClampedY(this.getClientY(event));
             scrollBar.style.top = (nextPosition - this.yMin) + 'px';
             this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, this.yMax));
         }
+    }
+
+    /**
+     * Touch start handler on viewport for natural finger swipe scrolling.
+     * @param event touch event.
+     */
+    private onViewportTouchStart(event: TouchEvent): void {
+        this.setScrollBounds();
+        this.lastViewportTouchY = this.getClientY(event);
+    }
+
+    /**
+     * Touch move handler on viewport for natural finger swipe scrolling.
+     * @param event touch event.
+     */
+    private onViewportTouchMove(event: TouchEvent): void {
+        if (this.lastViewportTouchY == null) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const currentY = this.getClientY(event);
+        const deltaY = this.lastViewportTouchY - currentY;
+        this.lastViewportTouchY = currentY;
+        this.moveScrollBarByDelta(deltaY);
     }
 
     /**
@@ -175,10 +224,6 @@ export class ScrollUtilities {
       
         event.preventDefault();
         event.stopImmediatePropagation();
-
-        const scrollBar = this.getGridScrollBar();
-        const currentPosition = this.getClampedY(scrollBar.getBoundingClientRect().y);
-        let nextPosition = currentPosition;
 
         // Reduce sensitivity and accumulate sub-pixel deltas for natural wheel/trackpad feel.
         const sensitivity = 0.2;
@@ -193,11 +238,7 @@ export class ScrollUtilities {
         }
 
         this.wheelDeltaBuffer -= pixelDelta;
-        nextPosition = currentPosition + pixelDelta;
-
-        nextPosition = this.getClampedY(nextPosition);
-        scrollBar.style.top = (nextPosition - this.yMin) + 'px';
-        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, this.yMax));
+        this.moveScrollBarByDelta(pixelDelta);
     }
 
     /**
@@ -238,6 +279,40 @@ export class ScrollUtilities {
 
     private getGridViewport(): HTMLElement {
         return this.shadowRoot.querySelector('.data-viewport');
+    }
+
+    /**
+     * Gets pointer y value for both mouse and touch events.
+     * @param event pointer event.
+     * @returns y coordinate.
+     */
+    private getClientY(event: MouseEvent | TouchEvent): number {
+        const touchEvent = event as TouchEvent;
+        if (touchEvent.touches && touchEvent.touches.length > 0) {
+            return touchEvent.touches[0].clientY;
+        }
+
+        if (touchEvent.changedTouches && touchEvent.changedTouches.length > 0) {
+            return touchEvent.changedTouches[0].clientY;
+        }
+
+        return (event as MouseEvent).clientY;
+    }
+
+    /**
+     * Moves scrollbar by delta and emits scroll position.
+     * @param deltaY delta movement.
+     */
+    private moveScrollBarByDelta(deltaY: number): void {
+        const scrollBar = this.getGridScrollBar();
+        if (!scrollBar) {
+            return;
+        }
+
+        const currentPosition = this.getClampedY(scrollBar.getBoundingClientRect().y);
+        const nextPosition = this.getClampedY(currentPosition + deltaY);
+        scrollBar.style.top = (nextPosition - this.yMin) + 'px';
+        this.scrollMoveComplete$.next(new GridScrollPosition(this.yMin, nextPosition, this.yMax));
     }
 
     /**
