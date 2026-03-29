@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.5...v0.1.1) (2026-03-29)
+
+
+### Features
+
+* Add export feature and updated demo. ([aeb564a](https://github.com/ganesh-vellanki/gs-grid/commit/aeb564ad02347ff2bed6f541acbc7524900b6aa7))
+* Add search functionality ([9336ab6](https://github.com/ganesh-vellanki/gs-grid/commit/9336ab65c72d13dd3e581abb01c72f88ffc837ba))
+* Fix touch events. ([0fc746b](https://github.com/ganesh-vellanki/gs-grid/commit/0fc746b861dfb7e44a63a00e45c4fecd255b2516))
+* Update grid search inputs. ([ff74454](https://github.com/ganesh-vellanki/gs-grid/commit/ff74454a2a6b533287532af1ea3b46cfa548867b))
+
 ## [0.1.0](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.5...v0.1.0) (2026-03-28)
 
 ### ⚡ First stable release — out of alpha
