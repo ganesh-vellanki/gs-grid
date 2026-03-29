@@ -124,9 +124,8 @@ export class Virtualize {
             this.setGridHeight();
             
             // Re-render current page with new rowsPerIndex based on resized height
-            if (this.lastStartIndex >= 0) {
-                this.renderViewportRows(this.getDataSetForIndex(this.lastStartIndex));
-            }
+            const startIndex = this.lastStartIndex >= 0 ? this.lastStartIndex : 0;
+            this.renderViewportRows(this.getDataSetForIndex(startIndex));
         });
 
         this.resizeObserver.observe(viewport);
