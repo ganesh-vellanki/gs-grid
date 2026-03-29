@@ -46,6 +46,16 @@ export class GridConfig<T> implements IGridConfig {
     clearSearch?: () => Promise<boolean>;
 
     /**
+     * Convenience API to export current grid data to Excel.
+     */
+    exportToExcel?: (fileName?: string) => Promise<boolean>;
+
+    /**
+     * Convenience API to export current grid data to CSV.
+     */
+    exportToCsv?: (fileName?: string) => Promise<boolean>;
+
+    /**
      * Creates an instance of grid config.
      */
     constructor(){
