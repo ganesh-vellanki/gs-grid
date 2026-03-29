@@ -1,12 +1,13 @@
-import * as ko from 'knockout';
 import { ComponentRegistry } from './components/component-registry';
 import { RouteInfo, Router } from './router';
+
+const ko = (window as any).ko;
 
 class GridAppViewModel {
     routerHatchId = 'koRouterHatch';
     router: Router;
     routes: RouteInfo[];
-    componentView: ko.Observable;
+    componentView: any;
 
     constructor() {
         ComponentRegistry.registerAppComponents(ko);
@@ -49,4 +50,7 @@ class GridAppViewModel {
     }
 }
 
-ko.applyBindings(new GridAppViewModel(), document.getElementById('gridApp'));
+const root = document.getElementById('gridApp');
+if (root) {
+    ko.applyBindings(new GridAppViewModel(), root);
+}

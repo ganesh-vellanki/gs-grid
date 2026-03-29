@@ -46,4 +46,14 @@ export interface IGridConfig {
      * Convenience API to clear active global search.
      */
     clearSearch?: () => Promise<boolean>;
+
+    /**
+     * Convenience API to export current grid data to Excel.
+     */
+    exportToExcel?: (fileName?: string) => Promise<boolean>;
+
+    /**
+     * Convenience API to export current grid data to CSV.
+     */
+    exportToCsv?: (fileName?: string) => Promise<boolean>;
 }

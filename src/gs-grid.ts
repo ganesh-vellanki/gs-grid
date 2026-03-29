@@ -1,4 +1,4 @@
-import { CellUtilities, Virtualize, SortUtilities } from "./core";
+import { CellUtilities, Virtualize, SortUtilities, ExportUtilities } from "./core";
 import { IGridConfig, IGridRenderer, IGridScrollPosition } from "./interface";
 import { GridColumn, GridInstance } from "./model";
 import { FlexHeaderRenderer, FlexDataRowRenderer, ScrollRenderer } from "./renderers";
@@ -281,7 +281,9 @@ export class GsGrid extends HTMLElement {
         this.gridConfig.instance = new GridInstance(this.instanceId, {
             updateData: async (data: any[]) => this.updateDataSet(data),
             performSearch: async (query: string) => this.performSearch(query),
-            clearSearch: async () => this.performSearch('')
+            clearSearch: async () => this.performSearch(''),
+            exportToExcel: async (fileName?: string) => this.exportToExcel(fileName),
+            exportToCsv: async (fileName?: string) => this.exportToCsv(fileName)
         });
     }
 
@@ -291,6 +293,28 @@ export class GsGrid extends HTMLElement {
     private bindConfigSearchApi() {
         this.gridConfig.performSearch = (query: string) => this.performSearch(query);
         this.gridConfig.clearSearch = () => this.performSearch('');
+        this.gridConfig.exportToExcel = (fileName?: string) => this.exportToExcel(fileName);
+        this.gridConfig.exportToCsv = (fileName?: string) => this.exportToCsv(fileName);
+    }
+
+    /**
+     * Exports current grid dataset to an xlsx file.
+     * @param fileName optional download file name without extension.
+     */
+    private exportToExcel(fileName?: string): Promise<boolean> {
+        const data = this.gridConfig.data || [];
+        const columns = this.gridConfig.columnDefs || [];
+        return Promise.resolve(ExportUtilities.exportToExcel(data, columns, fileName));
+    }
+
+    /**
+     * Exports current grid dataset to a csv file.
+     * @param fileName optional download file name without extension.
+     */
+    private exportToCsv(fileName?: string): Promise<boolean> {
+        const data = this.gridConfig.data || [];
+        const columns = this.gridConfig.columnDefs || [];
+        return Promise.resolve(ExportUtilities.exportToCsv(data, columns, fileName));
     }
 
     /**

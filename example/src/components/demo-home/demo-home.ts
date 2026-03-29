@@ -96,6 +96,22 @@ class DemoHome {
         await this.gridConfig.performSearch('');
     }
 
+    async exportToExcel() {
+        if (!this.gridConfig || !this.gridConfig.exportToExcel) {
+            return;
+        }
+
+        await this.gridConfig.exportToExcel('gs-grid-demo-export');
+    }
+
+    async exportToCsv() {
+        if (!this.gridConfig || !this.gridConfig.exportToCsv) {
+            return;
+        }
+
+        await this.gridConfig.exportToCsv('gs-grid-demo-export');
+    }
+
     async getUsers() {
         const response = await fetch('https://randomuser.me/api/?results=200&seed=gsGrid');
         const json = await response.json();

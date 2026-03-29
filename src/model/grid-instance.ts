@@ -4,6 +4,8 @@ export interface GridInstanceHandlers {
     updateData?: (data: any[]) => Promise<boolean>;
     performSearch?: (query: string) => Promise<boolean>;
     clearSearch?: () => Promise<boolean>;
+    exportToExcel?: (fileName?: string) => Promise<boolean>;
+    exportToCsv?: (fileName?: string) => Promise<boolean>;
 }
 
 /**
@@ -45,6 +47,22 @@ export class GridInstance implements IGridInstance {
     clearSearch(): Promise<boolean> {
         if (this.handlers.clearSearch) {
             return this.handlers.clearSearch();
+        }
+
+        return Promise.resolve(false);
+    }
+
+    exportToExcel(fileName?: string): Promise<boolean> {
+        if (this.handlers.exportToExcel) {
+            return this.handlers.exportToExcel(fileName);
+        }
+
+        return Promise.resolve(false);
+    }
+
+    exportToCsv(fileName?: string): Promise<boolean> {
+        if (this.handlers.exportToCsv) {
+            return this.handlers.exportToCsv(fileName);
         }
 
         return Promise.resolve(false);
