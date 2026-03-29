@@ -37,6 +37,34 @@ export class ScrollRenderer implements IGridRenderer {
     }
 
     /**
+     * Updates scroll bar thumb height based on viewport/content ratio.
+     * @param shadowRoot grid shadow root.
+     * @param rowCount row count in current data set.
+     * @param rowHeight grid row height.
+     * @param isVirtualizationActive determines if virtualization mode is active.
+     */
+    updateScrollBarThumbSize(shadowRoot: ShadowRoot, rowCount: number, rowHeight: number, isVirtualizationActive: boolean): void {
+        const viewport = shadowRoot.querySelector('.data-viewport') as HTMLElement;
+        const scrollBar = shadowRoot.querySelector('.scroll-bar') as HTMLElement;
+
+        if (!viewport || !scrollBar) {
+            return;
+        }
+
+        const viewportHeight = viewport.clientHeight || rowHeight;
+
+        if (rowCount <= 0 || !isVirtualizationActive) {
+            scrollBar.style.height = `${Math.max(20, Math.min(36, viewportHeight))}px`;
+            return;
+        }
+
+        const totalContentHeight = Math.max(viewportHeight, rowCount * rowHeight);
+        const proportionalHeight = (viewportHeight / totalContentHeight) * viewportHeight;
+        const thumbHeight = Math.max(20, Math.min(viewportHeight, Math.round(proportionalHeight)));
+        scrollBar.style.height = `${thumbHeight}px`;
+    }
+
+    /**
      * Gets scroll bar template.
      * @param [options] render options.
      * @returns scroll bar template.

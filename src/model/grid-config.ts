@@ -36,6 +36,16 @@ export class GridConfig<T> implements IGridConfig {
     data?: T[];
 
     /**
+     * Convenience API for global search across grid columns.
+     */
+    performSearch?: (query: string) => Promise<boolean>;
+
+    /**
+     * Convenience API to clear active global search.
+     */
+    clearSearch?: () => Promise<boolean>;
+
+    /**
      * Creates an instance of grid config.
      */
     constructor(){

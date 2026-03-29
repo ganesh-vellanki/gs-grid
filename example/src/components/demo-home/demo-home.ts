@@ -4,6 +4,7 @@ import { GridConfig, GridEvents } from '../../../../src/model';
 
 class DemoHome {
     usersList: any[] = [];
+    gridConfig: GridConfig<any>;
 
     constructor() {
         const gsGridRef = gsGrid;
@@ -62,15 +63,37 @@ class DemoHome {
     }
 
     async setupGridAndApplyData() {
-        const gridConfig = new GridConfig();
-        gridConfig.columnDefs = this.buildGridColumns();
-        gridConfig.rowHeight = 31;
+        this.gridConfig = new GridConfig();
+        this.gridConfig.columnDefs = this.buildGridColumns();
+        this.gridConfig.rowHeight = 31;
 
-        gridConfig.data = await this.getUsers();
+        this.gridConfig.data = await this.getUsers();
         const gridEl = document.querySelector('gs-grid');
         if (gridEl) {
-            GridEvents.setupGridConfig(gridEl.getAttribute('instance-id'), gridConfig);
+            GridEvents.setupGridConfig(gridEl.getAttribute('instance-id'), this.gridConfig);
         }
+    }
+
+    async onSearchInput(_: any, event: Event) {
+        if (!this.gridConfig || !this.gridConfig.performSearch) {
+            return;
+        }
+
+        const target = event.target as HTMLInputElement;
+        await this.gridConfig.performSearch(target ? target.value : '');
+    }
+
+    async clearSearch() {
+        if (!this.gridConfig || !this.gridConfig.performSearch) {
+            return;
+        }
+
+        const searchInput = document.getElementById('demo-grid-search') as HTMLInputElement;
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        await this.gridConfig.performSearch('');
     }
 
     async getUsers() {

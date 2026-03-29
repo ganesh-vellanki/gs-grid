@@ -1,13 +1,21 @@
 import { IGridInstance } from "../interface";
 
+export interface GridInstanceHandlers {
+    updateData?: (data: any[]) => Promise<boolean>;
+    performSearch?: (query: string) => Promise<boolean>;
+    clearSearch?: () => Promise<boolean>;
+}
+
 /**
  * Grid instance to handle operations on rendered grid.
  */
 export class GridInstance implements IGridInstance {
     id: string;
+    private handlers: GridInstanceHandlers;
 
-    constructor(id: string) {
+    constructor(id: string, handlers?: GridInstanceHandlers) {
         this.id = id;
+        this.handlers = handlers || {};
     }
 
     refreshGrid(delay?: number): Promise<boolean> {
@@ -19,7 +27,27 @@ export class GridInstance implements IGridInstance {
     }
 
     updateData(data: any[]): Promise<boolean> {
-        throw new Error("Method not implemented.");
+        if (this.handlers.updateData) {
+            return this.handlers.updateData(data);
+        }
+
+        return Promise.resolve(false);
+    }
+
+    performSearch(query: string): Promise<boolean> {
+        if (this.handlers.performSearch) {
+            return this.handlers.performSearch(query);
+        }
+
+        return Promise.resolve(false);
+    }
+
+    clearSearch(): Promise<boolean> {
+        if (this.handlers.clearSearch) {
+            return this.handlers.clearSearch();
+        }
+
+        return Promise.resolve(false);
     }
 
     clearData(data: any[], showNoDataMessage: true, message: string): Promise<boolean> {

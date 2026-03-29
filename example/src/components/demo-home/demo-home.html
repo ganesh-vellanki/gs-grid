@@ -2,6 +2,14 @@
     <div class="col-12">
         <h3>Grid demo</h3>
     </div>
+    <div class="col-3 mb-3">
+        <div class="input-group">
+            <input id="demo-grid-search" type="text" class="form-control" placeholder="Search across all columns" data-bind="event: { input: onSearchInput.bind($data) }" />
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" data-bind="click: clearSearch.bind($data)">Clear</button>
+            </div>
+        </div>
+    </div>
     <div class="col-12">
         <gs-grid></gs-grid>
     </div>

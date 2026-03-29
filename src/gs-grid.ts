@@ -1,6 +1,6 @@
 import { CellUtilities, Virtualize, SortUtilities } from "./core";
 import { IGridConfig, IGridRenderer, IGridScrollPosition } from "./interface";
-import { GridColumn } from "./model";
+import { GridColumn, GridInstance } from "./model";
 import { FlexHeaderRenderer, FlexDataRowRenderer, ScrollRenderer } from "./renderers";
 import { ScrollUtilities } from './core';
 
@@ -41,7 +41,7 @@ export class GsGrid extends HTMLElement {
     /**
      * Scroll renderer of gs grid.
      */
-    private scrollRenderer: IGridRenderer;
+    private scrollRenderer: ScrollRenderer;
 
     /**
      * Cell utils of gs grid.
@@ -54,9 +54,24 @@ export class GsGrid extends HTMLElement {
     private virtualizationCore: Virtualize;
 
     /**
+     * Smart scroll utility instance.
+     */
+    private smartScrollUtils: ScrollUtilities;
+
+    /**
      * Original unsorted dataset, preserved for reset when sort direction cycles back to none.
      */
     private originalData: any[];
+
+    /**
+     * Base data set used for search reset.
+     */
+    private baseData: any[];
+
+    /**
+     * Current search result set before sorting is applied.
+     */
+    private filteredData: any[];
 
     /**
      * Currently active sort field.
@@ -67,6 +82,11 @@ export class GsGrid extends HTMLElement {
      * Currently active sort direction.
      */
     private activeSortDirection: 'asc' | 'desc' | null = null;
+
+    /**
+     * Flag to indicate whether virtualization is currently active.
+     */
+    private isVirtualizationActive: boolean = true;
 
     /**
      * Creates an instance of gs-grid.
@@ -131,7 +151,11 @@ export class GsGrid extends HTMLElement {
     private onGridConfigSet(gridConfig: IGridConfig) {
         this.gridConfig = gridConfig;
         this.gridConfig.columnDefs = gridConfig.columnDefs.map(c => new GridColumn(c));
-        this.originalData = [...gridConfig.data];
+        this.baseData = [...(gridConfig.data || [])];
+        this.filteredData = [...this.baseData];
+        this.originalData = [...this.filteredData];
+        this.bindInstanceApi();
+        this.bindConfigSearchApi();
 
         // Initialize Cell utils with params.
         this.cellUtils = new CellUtilities(this.getAvailableWidth());
@@ -157,17 +181,19 @@ export class GsGrid extends HTMLElement {
         // Init smart scroll.
         // TODO: move smart scroll reg to new method.
         // TODO: Use Rxjs & remove timeout.
-        var smartScroll = new ScrollUtilities(this.shadowRoot);
+        this.smartScrollUtils = new ScrollUtilities(this.shadowRoot);
         setTimeout(() => {
-            smartScroll.registerSmartScrollEvents();
+            this.smartScrollUtils.registerSmartScrollEvents();
         }, 2000);
 
         // Init virtualization core.
         // TODO: Use Rxjs & remove timeout.
         setTimeout(() => {
             this.initializeVirtualization();
-            smartScroll.scrollMoveComplete$.subscribe((scrollPosition: IGridScrollPosition) => {
-                this.virtualizationCore.OnGridScrollPositionChange(scrollPosition);
+            this.smartScrollUtils.scrollMoveComplete$.subscribe((scrollPosition: IGridScrollPosition) => {
+                if (this.virtualizationCore && this.isVirtualizationActive) {
+                    this.virtualizationCore.OnGridScrollPositionChange(scrollPosition);
+                }
             });
         }, 500);
     }
@@ -243,13 +269,134 @@ export class GsGrid extends HTMLElement {
             sortedData = SortUtilities.sortDataSet(this.originalData, column, this.activeSortDirection);
         }
 
-        this.gridConfig.data = sortedData;
-
-        if (this.virtualizationCore) {
-            this.virtualizationCore.setDataSet(sortedData);
-        }
+        this.applyRenderDataSet(sortedData);
 
         this.updateSortIndicator(this.activeSortField, this.activeSortDirection);
+    }
+
+    /**
+     * Binds instance-level APIs for runtime data operations.
+     */
+    private bindInstanceApi() {
+        this.gridConfig.instance = new GridInstance(this.instanceId, {
+            updateData: async (data: any[]) => this.updateDataSet(data),
+            performSearch: async (query: string) => this.performSearch(query),
+            clearSearch: async () => this.performSearch('')
+        });
+    }
+
+    /**
+     * Binds config-level convenience API for search.
+     */
+    private bindConfigSearchApi() {
+        this.gridConfig.performSearch = (query: string) => this.performSearch(query);
+        this.gridConfig.clearSearch = () => this.performSearch('');
+    }
+
+    /**
+     * Applies a new source data set and refreshes rendered rows.
+     * @param data new source data.
+     */
+    private updateDataSet(data: any[]): Promise<boolean> {
+        const nextData = data || [];
+        this.baseData = [...nextData];
+        this.filteredData = [...nextData];
+        this.originalData = [...nextData];
+        this.activeSortField = null;
+        this.activeSortDirection = null;
+        this.updateSortIndicator(null, null);
+        this.applyRenderDataSet(nextData);
+        return Promise.resolve(true);
+    }
+
+    /**
+     * Performs a global search across all configured column fields.
+     * @param query search query.
+     */
+    private performSearch(query: string): Promise<boolean> {
+        const normalized = (query || '').trim().toLowerCase();
+
+        if (!normalized) {
+            this.filteredData = [...this.baseData];
+        } else {
+            const searchFields = this.gridConfig.columnDefs.map(c => c.field);
+            this.filteredData = this.baseData.filter(row => {
+                return searchFields.some(field => {
+                    const value = SortUtilities.getFieldValue(field, row);
+                    return value != null && String(value).toLowerCase().indexOf(normalized) > -1;
+                });
+            });
+
+            // If no results, fall back to full data by default.
+            if (this.filteredData.length === 0) {
+                this.filteredData = [...this.baseData];
+            }
+        }
+
+        this.originalData = [...this.filteredData];
+
+        if (this.activeSortField && this.activeSortDirection) {
+            const sortCol = this.gridConfig.columnDefs.find(c => c.field === this.activeSortField);
+            const sorted = SortUtilities.sortDataSet(this.originalData, sortCol, this.activeSortDirection);
+            this.applyRenderDataSet(sorted);
+        } else {
+            this.applyRenderDataSet(this.originalData);
+        }
+
+        return Promise.resolve(true);
+    }
+
+    /**
+     * Applies dataset to config and viewport renderer.
+     * @param data rows to render.
+     */
+    private applyRenderDataSet(data: any[]) {
+        this.gridConfig.data = data;
+        this.updateVirtualizationMode(data);
+
+        if (this.virtualizationCore && this.isVirtualizationActive) {
+            this.virtualizationCore.setDataSet(data);
+            return;
+        }
+
+        (this.dataRowRenderer as FlexDataRowRenderer).updateViewportRows({ data });
+    }
+
+    /**
+     * Enables/disables virtualization and custom scrollbar based on visible row capacity.
+     * @param data current dataset.
+     */
+    private updateVirtualizationMode(data: any[]) {
+        const rowCount = data ? data.length : 0;
+        const visibleRows = this.getVisibleRowCapacity();
+        this.isVirtualizationActive = rowCount > visibleRows;
+
+        this.scrollRenderer.updateScrollBarThumbSize(this.shadowRoot, rowCount, this.gridConfig.rowHeight, this.isVirtualizationActive);
+
+        const scrollContainer = this.shadowRoot.querySelector('.smart-scroll') as HTMLElement;
+        if (scrollContainer) {
+            scrollContainer.style.display = this.isVirtualizationActive ? 'block' : 'none';
+        }
+
+        if (this.smartScrollUtils) {
+            this.smartScrollUtils.unRegisterSmartScrollEvents();
+            if (this.isVirtualizationActive) {
+                this.smartScrollUtils.registerSmartScrollEvents();
+            }
+        }
+    }
+
+    /**
+     * Calculates how many rows fit in current viewport height.
+     * @returns visible row capacity.
+     */
+    private getVisibleRowCapacity(): number {
+        const viewport = this.shadowRoot.querySelector('.data-viewport') as HTMLElement;
+        const viewportHeight = viewport && viewport.clientHeight > 0
+            ? viewport.clientHeight
+            : this.gridConfig.rowHeight;
+
+        return Math.max(1, Math.floor(viewportHeight / this.gridConfig.rowHeight));
     }
 
     /**
@@ -320,6 +467,21 @@ export class GsGrid extends HTMLElement {
         const gridHeight = this.clientHeight > 0 ? this.clientHeight : availableHeight;
         
         this.updateViewportHeight(gridHeight, headerHeight);
+
+        const currentData = this.gridConfig.data || [];
+        const previousMode = this.isVirtualizationActive;
+        this.updateVirtualizationMode(currentData);
+
+        if (!this.virtualizationCore) {
+            return;
+        }
+
+        // Re-render after resize to reflect mode/capacity changes immediately.
+        if (this.isVirtualizationActive) {
+            this.virtualizationCore.setDataSet(currentData);
+        } else if (previousMode !== this.isVirtualizationActive || currentData.length > 0) {
+            (this.dataRowRenderer as FlexDataRowRenderer).updateViewportRows({ data: currentData });
+        }
     }
 
     /**
@@ -361,6 +523,8 @@ export class GsGrid extends HTMLElement {
                 (this.dataRowRenderer as FlexDataRowRenderer).updateViewportRows({ data: rows });
             }
         );
+
+        this.updateVirtualizationMode(this.gridConfig.data || []);
     }
 
     /**
