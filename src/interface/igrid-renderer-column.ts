@@ -29,4 +29,9 @@ export interface IGridRenderColumn {
      * Value of cell min width.
      */
     minWidth: number | string | CellWidth;
+
+    /**
+     * Whether this column is sortable.
+     */
+    enableSort?: boolean;
 }

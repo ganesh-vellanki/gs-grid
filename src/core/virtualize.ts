@@ -52,6 +52,16 @@ export class Virtualize {
     }
 
     /**
+     * Replaces the internal dataset (e.g. after sort) and re-renders from the top.
+     * @param data new dataset.
+     */
+    public setDataSet(data: any[]): void {
+        this.dataSet = [...data];
+        this.lastStartIndex = -1;
+        this.renderViewportRows(this.getDataSetForIndex(0));
+    }
+
+    /**
      * Callback on grid scroll position change.
      * @param scrollYPos scroll position.
      */

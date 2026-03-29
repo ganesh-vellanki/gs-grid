@@ -7,6 +7,7 @@ export class GridColumn implements IGridColumn {
     headerName: string;
     valueFn?: () => string | number;
     enableSort?: boolean;
+    sortFn?: (aValue: any, bValue: any, aRow: any, bRow: any, direction: 'asc' | 'desc') => number;
     enableFilter?: boolean;
     pinColumn?: PinColumn;
     width: number | string | CellWidth;
@@ -17,6 +18,7 @@ export class GridColumn implements IGridColumn {
         this.headerName = args.headerName;
         this.valueFn = args.valueFn || null;
         this.enableSort = args.enableSort || false;
+        this.sortFn = args.sortFn || null;
         this.enableFilter = args.enableFilter || false;
         this.pinColumn = args.pinColumn || PinColumn.None;
         this.width = args.width || CellWidth.Auto;
