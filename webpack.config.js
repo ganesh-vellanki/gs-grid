@@ -6,8 +6,11 @@ module.exports = {
     mode: 'development',
     devServer: {
         liveReload: true,
-        watchContentBase: true,
-        publicPath: '/demo/'
+        static: {
+            directory: path.resolve(__dirname, 'demo'),
+            publicPath: '/demo/'
+        },
+        watchFiles: ['src/**/*', 'example/**/*']
     },
     module: {
         rules: [{
@@ -21,11 +24,21 @@ module.exports = {
             },
             { test: /\.scss$/, use: [ 
                 { loader: "css-loader" },
-                { loader: "sass-loader" },
+                {
+                    loader: "sass-loader",
+                    options: {
+                        api: "modern-compiler"
+                    }
+                },
             ] },
             {
                 test: /\.html$/,
-                use: 'html-loader'
+                use: {
+                    loader: 'html-loader',
+                    options: {
+                        esModule: false
+                    }
+                }
             }
         ],
     },

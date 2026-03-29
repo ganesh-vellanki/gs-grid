@@ -7,9 +7,10 @@ import { IGridConfig, IGridRenderColumn, IGridRenderer } from "../interface";
 export class FlexDataRowRenderer implements IGridRenderer {
     /**
      * Creates an instance of flex column renderer.
-     * @param columns grid columns.
-     * @param cellUtils cell utilities.
+        * @param _renderCols grid columns.
+        * @param _cellUtils cell utilities.
      * @param gridConfig grid config.
+        * @param shadowRoot shadow root.
      */
     constructor(private _renderCols: IGridRenderColumn[], 
                 private _cellUtils: CellUtilities, 
