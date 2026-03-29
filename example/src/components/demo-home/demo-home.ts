@@ -16,37 +16,47 @@ class DemoHome {
         return [
             {
                 field: 'name',
-                headerName: 'Name'
+                headerName: 'Name',
+                enableSort: true
+            },
+            {
+                field: 'age',
+                headerName: 'Age',
+                width: 80,
+                enableSort: true
             },
             {
                 field: 'username',
-                headerName: 'User name'
+                headerName: 'User name',
+                enableSort: true
             },
             {
                 field: 'email',
-                headerName: 'Email'
+                headerName: 'Email',
+                enableSort: true
             },
             {
                 field: 'phone',
-                headerName: 'Phone'
+                headerName: 'Phone',
+                enableSort: true
             },
             {
-                field: 'website',
-                headerName: 'Website'
+                field: 'gender',
+                headerName: 'Gender',
+                width: 100,
+                enableSort: true
             },
             {
-                field: 'address.city',
+                field: 'location.city',
                 headerName: 'City',
-                width: 120
+                width: 140,
+                enableSort: true
             },
             {
-                field: 'company.name',
-                headerName: 'Company'
-            },
-            {
-                field: 'address.zipcode',
-                headerName: 'Zip',
-                width: 100
+                field: 'location.country',
+                headerName: 'Country',
+                width: 120,
+                enableSort: true
             }
         ];
     }
@@ -56,13 +66,7 @@ class DemoHome {
         gridConfig.columnDefs = this.buildGridColumns();
         gridConfig.rowHeight = 31;
 
-        const usersList = await this.getUsers();
-
-        for (let i = 0; i<=10; i ++) {
-            this.usersList = this.usersList.concat([... usersList]);
-        }
-
-        gridConfig.data = this.usersList;
+        gridConfig.data = await this.getUsers();
         const gridEl = document.querySelector('gs-grid');
         if (gridEl) {
             GridEvents.setupGridConfig(gridEl.getAttribute('instance-id'), gridConfig);
@@ -70,7 +74,17 @@ class DemoHome {
     }
 
     async getUsers() {
-        return fetch('https://jsonplaceholder.typicode.com/users').then(response => response.json());
+        const response = await fetch('https://randomuser.me/api/?results=200&seed=gsGrid');
+        const json = await response.json();
+        return (json.results as any[]).map(u => ({
+            name: `${u.name.first} ${u.name.last}`,
+            username: u.login.username,
+            email: u.email,
+            phone: u.phone,
+            gender: u.gender,
+            location: { city: u.location.city, country: u.location.country },
+            age: u.dob.age
+        }));
     }
 }
 
