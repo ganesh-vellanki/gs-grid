@@ -19,6 +19,14 @@
 
 > Requires native [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) support (Custom Elements v1 + Shadow DOM v1).
 
+## Upcoming Features
+
+1. Row selection
+2. Pinning
+3. Grouping
+4. Column resizing
+5. Column dynamic re-order
+
 #### Steps to run locally: 
 
 * Install packages locally with: `yarn install`
