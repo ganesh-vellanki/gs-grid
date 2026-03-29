@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.5...v0.1.0) (2026-03-28)
+
+### ⚡ First stable release — out of alpha
+
+### Features
+
+* **sorting:** Column sorting with built-in comparator and optional custom `sortFn` returning a number. Click header to cycle none → asc → desc → none.
+* **virtualization:** Viewport-aware row virtualization — only rows in view are rendered, scroll position drives the visible window.
+* **scroll:** Smooth custom scrollbar with wheel delta buffering, normalized bounds, and pointer drag.
+* **nested fields:** Column `field` supports dot-notation for nested object properties (e.g. `location.city`).
+* **browser compatibility:** Chrome 67+, Edge 79+, Firefox 63+, Safari 10.1+, Opera 54+.
+* **demo:** Switched demo data source to `randomuser.me` (200 unique users, nested `location` fields).
+* **docs:** Added Get Started, What & Why, and browser compatibility pages to example app.
+
+### Build
+
+* **deps:** Upgrade to TypeScript 5.4, webpack 5, webpack-dev-server 4, ts-loader 9, css-loader 6, style-loader 3, html-loader 4, html-webpack-plugin 5, sass-loader 13, rxjs 7.8, concurrently 8.
+* **webpack:** Migrated devServer config to webpack-dev-server v4 `static` API.
+* **tsconfig:** Module set to `ES2020`, moduleResolution set to `bundler` for TypeScript 5 compatibility.
+* **sass:** Replaced deprecated `node-sass` with `sass` (Dart Sass).
+
 ### [0.0.1-alpha.5](https://github.com/ganesh-vellanki/gs-grid/compare/v0.0.1-alpha.4...v0.0.1-alpha.5) (2026-03-29)
 
 

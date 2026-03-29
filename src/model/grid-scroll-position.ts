@@ -7,7 +7,9 @@ export class GridScrollPosition implements IGridScrollPosition {
 
     /**
      * Creates an instance of grid scroll position.
-     * @param args init args.
+        * @param yMin minimum y bound.
+        * @param y current y position.
+        * @param yMax maximum y bound.
      */
     constructor(yMin: number, y:number, yMax: number) {
         this.yMin = yMin;

@@ -28,7 +28,6 @@ export class CellUtilities {
      * Computes cell essentials.
      * @param cells columns of grid config, represents cell of a field.
      * @param forceCalc if true, recalculates width again.
-     * @param gridWidth width of grid body. 
      * @returns computed grid column widths.
      */
     computeCellEssentials(cells: ICellConfig[], forceCalc: boolean) {
