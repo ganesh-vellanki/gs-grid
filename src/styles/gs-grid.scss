@@ -14,6 +14,34 @@
         font-size: 14px;
         justify-content: center;
 
+        &.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        &.sortable .cell-content {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        &.sortable .cell-content::after {
+            content: "";
+            font-size: 10px;
+            line-height: 1;
+            color: #757575;
+        }
+
+        &.sortable.sort-asc .cell-content::after {
+            content: "▲";
+            color: #2d5be3;
+        }
+
+        &.sortable.sort-desc .cell-content::after {
+            content: "▼";
+            color: #2d5be3;
+        }
+
         .cell-content {
             overflow: hidden;
             font-size: 14px;

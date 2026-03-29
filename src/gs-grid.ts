@@ -1,4 +1,4 @@
-import { CellUtilities, Virtualize } from "./core";
+import { CellUtilities, Virtualize, SortUtilities } from "./core";
 import { IGridConfig, IGridRenderer, IGridScrollPosition } from "./interface";
 import { GridColumn } from "./model";
 import { FlexHeaderRenderer, FlexDataRowRenderer, ScrollRenderer } from "./renderers";
@@ -52,6 +52,21 @@ export class GsGrid extends HTMLElement {
      * Virtualization core of gs grid.
      */
     private virtualizationCore: Virtualize;
+
+    /**
+     * Original unsorted dataset, preserved for reset when sort direction cycles back to none.
+     */
+    private originalData: any[];
+
+    /**
+     * Currently active sort field.
+     */
+    private activeSortField: string | null = null;
+
+    /**
+     * Currently active sort direction.
+     */
+    private activeSortDirection: 'asc' | 'desc' | null = null;
 
     /**
      * Creates an instance of gs-grid.
@@ -116,6 +131,7 @@ export class GsGrid extends HTMLElement {
     private onGridConfigSet(gridConfig: IGridConfig) {
         this.gridConfig = gridConfig;
         this.gridConfig.columnDefs = gridConfig.columnDefs.map(c => new GridColumn(c));
+        this.originalData = [...gridConfig.data];
 
         // Initialize Cell utils with params.
         this.cellUtils = new CellUtilities(this.getAvailableWidth());
@@ -128,6 +144,9 @@ export class GsGrid extends HTMLElement {
 
         // Render grid header.
         this.initializeHeader();
+
+        // Wire sort click handlers on header.
+        this.initializeSortHandlers();
 
         // Render data rows.
         this.initializeViewport();
@@ -159,7 +178,7 @@ export class GsGrid extends HTMLElement {
      */
     registerRenderers(gridConfig: IGridConfig) {
         const rendererDataSet = gridConfig.columnDefs.map(x => {
-            return { displayName: x.headerName, field: x.field, width: x.width, minWidth: x.minWidth }
+            return { displayName: x.headerName, field: x.field, width: x.width, minWidth: x.minWidth, enableSort: x.enableSort }
         });
 
         // Register header renderer.
@@ -177,6 +196,81 @@ export class GsGrid extends HTMLElement {
      */
     private initializeHeader() {
         this.shadowRoot.appendChild(this.headerRenderer.render().cloneNode(true));
+    }
+
+    /**
+     * Attaches click listener to the header row for column sorting.
+     */
+    private initializeSortHandlers() {
+        const headerRow = this.shadowRoot.querySelector('.header-row');
+        if (!headerRow) {
+            return;
+        }
+
+        headerRow.addEventListener('click', (event: Event) => {
+            const target = (event.target as HTMLElement).closest('.header-column') as HTMLElement;
+            if (!target || !target.classList.contains('sortable')) {
+                return;
+            }
+
+            const field = target.dataset.field;
+            if (field) {
+                this.applySort(field);
+            }
+        });
+    }
+
+    /**
+     * Cycles sort state for the given field and re-renders via virtualization.
+     * Cycle: none → asc → desc → none
+     */
+    private applySort(field: string) {
+        if (this.activeSortField === field) {
+            this.activeSortDirection = this.activeSortDirection === 'asc' ? 'desc' : null;
+            if (!this.activeSortDirection) {
+                this.activeSortField = null;
+            }
+        } else {
+            this.activeSortField = field;
+            this.activeSortDirection = 'asc';
+        }
+
+        let sortedData: any[];
+        if (!this.activeSortField || !this.activeSortDirection) {
+            sortedData = [...this.originalData];
+        } else {
+            const column = this.gridConfig.columnDefs.find(c => c.field === this.activeSortField);
+            sortedData = SortUtilities.sortDataSet(this.originalData, column, this.activeSortDirection);
+        }
+
+        this.gridConfig.data = sortedData;
+
+        if (this.virtualizationCore) {
+            this.virtualizationCore.setDataSet(sortedData);
+        }
+
+        this.updateSortIndicator(this.activeSortField, this.activeSortDirection);
+    }
+
+    /**
+     * Updates the sort indicator CSS classes on the header row.
+     */
+    private updateSortIndicator(field: string | null, direction: 'asc' | 'desc' | null) {
+        const headerRow = this.shadowRoot.querySelector('.header-row');
+        if (!headerRow) {
+            return;
+        }
+
+        headerRow.querySelectorAll('.header-column').forEach(col => {
+            col.classList.remove('sort-asc', 'sort-desc');
+        });
+
+        if (field && direction) {
+            const activeCol = headerRow.querySelector(`.header-column[data-field="${field}"]`);
+            if (activeCol) {
+                activeCol.classList.add(`sort-${direction}`);
+            }
+        }
     }
 
     /**
