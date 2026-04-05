@@ -201,7 +201,7 @@ export class GsGrid extends HTMLElement {
         this.smartScrollUtils = new ScrollUtilities(this.getShadowRoot());
         setTimeout(() => {
             this.smartScrollUtils.registerSmartScrollEvents();
-        }, 2000);
+        });
 
         // Init virtualization core.
         // TODO: Use Rxjs & remove timeout.
@@ -212,7 +212,7 @@ export class GsGrid extends HTMLElement {
                     this.virtualizationCore.OnGridScrollPositionChange(scrollPosition);
                 }
             });
-        }, 500);
+        });
     }
 
     /**
