@@ -1,8 +1,25 @@
 {
     "name": "@gs-grid/gs-grid",
     "version": "0.1.2",
-    "description": "A new grid for evolving web",
-    "main": "index.ts",
+    "description": "Framework-agnostic Web Component data grid with sorting, search, export, virtualization, and row selection",
+    "main": "./dist/index.mjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "sideEffects": true,
+    "publishConfig": {
+        "access": "public"
+    },
     "repository": "https://github.com/ganesh-vellanki/gs-grid",
     "author": "velankiganesh@gmail.com",
     "license": "MIT",
@@ -11,17 +28,21 @@
         "tsc:watch": "tsc --watch",
         "typedoc": "typedoc",
         "tsc": "tsc",
+        "build:types": "tsc --declaration --declarationMap --emitDeclarationOnly --outDir ./dist",
+        "build:package": "yarn clean:dist && yarn build:types && webpack --config webpack.lib.config.cjs",
         "webpack": "webpack",
         "rm": "rm",
         "docs": "typedoc --entryPointStrategy expand ./src --out ./demo/docs --readme none",
-        "build:src": "tsc && webpack",
+        "build:src": "yarn build:package && yarn webpack",
         "prestart": "yarn build && yarn docs && yarn copy:app",
         "build": "yarn build:src",
         "copy:app": "cp example/index.html demo/index.html & cp example/main.bundle.js demo/main.bundle.js & cp example/style.css demo/style.css",
         "start": "webpack serve",
-        "clean": "yarn rm -rf dist && yarn rm -rf demo/",
+        "clean:dist": "yarn rm -rf dist",
+        "clean": "yarn clean:dist && yarn rm -rf demo/",
         "dev": "yarn build && yarn docs && concurrently --kill-others \"yarn tsc:watch\" \"yarn webpack --watch\" \"yarn webpack serve\"",
-        "release": "standard-version"
+        "release": "standard-version",
+        "prepublishOnly": "yarn build:package"
     },
     "husky": {
         "hooks": {}
