@@ -1,6 +1,6 @@
 {
     "name": "@gs-grid/gs-grid",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "Framework-agnostic Web Component data grid with sorting, search, export, virtualization, and row selection",
     "main": "./dist/index.mjs",
     "module": "./dist/index.mjs",
