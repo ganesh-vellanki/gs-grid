@@ -1,6 +1,12 @@
 import { CellUtilities } from "../core";
 import { IGridConfig, IGridRenderColumn, IGridRenderer } from "../interface";
 
+interface DataRowRenderOptions {
+    data?: any[];
+    enableRowSelection?: boolean;
+    isRowSelected?: (row: any) => boolean;
+}
+
 /**
  * Flex data row renderer.
  */
@@ -22,17 +28,21 @@ export class FlexDataRowRenderer implements IGridRenderer {
     /**
      * Renders flex column renderer.
      */
-    render(renderOptions?: any): HTMLElement {
+    render(renderOptions?: DataRowRenderOptions): HTMLElement {
         const dataViewport = document.createElement('div');
         dataViewport.classList.add('data-viewport');
 
-        if(renderOptions.data && renderOptions.data.length > 0) {
-            (renderOptions.data as any[]).forEach(dataRow => {
+        if(renderOptions?.data && renderOptions.data.length > 0) {
+            renderOptions.data.forEach((dataRow: any, index: number) => {
                 let colTemplate = '';
+                const isSelected = renderOptions.isRowSelected ? renderOptions.isRowSelected(dataRow) : false;
+                if (renderOptions.enableRowSelection) {
+                    colTemplate += this.selectionCellTemplateFragmentFn(isSelected);
+                }
                 this._renderCols.forEach(col => {
                     colTemplate += this.cellTemplateFragmentFn(col.field, dataRow);
                 });
-                dataViewport.append(this.rowTemplateFragmentFn(colTemplate));
+                dataViewport.append(this.rowTemplateFragmentFn(colTemplate, index, isSelected));
             });
         }
         
@@ -43,9 +53,9 @@ export class FlexDataRowRenderer implements IGridRenderer {
      * Renders into viewport.
      * @param [renderOptions] render options.
      */
-    renderIntoViewport(renderOptions?: any): void {
+    renderIntoViewport(renderOptions?: DataRowRenderOptions): void {
         if (this.shadowRoot) {
-            this.shadowRoot.append(this.render({ data: this.gridConfig.data }));
+            this.shadowRoot.append(this.render(renderOptions || { data: this.gridConfig.data }));
         }
     }
 
@@ -53,13 +63,13 @@ export class FlexDataRowRenderer implements IGridRenderer {
      * Updates viewport with the provided data set.
      * @param renderOptions render options.
      */
-    updateViewportRows(renderOptions?: any): void {
+    updateViewportRows(renderOptions?: DataRowRenderOptions): void {
         const viewport = this.shadowRoot.querySelector('.data-viewport');
 
         if (viewport) {
             const smartScroll = viewport.querySelector('.smart-scroll');
             viewport.classList.add('scrolling-viewport');
-            viewport.innerHTML = this.renderNewRows(renderOptions ? renderOptions.data : []);
+            viewport.innerHTML = this.renderNewRows(renderOptions);
             if (smartScroll) {
                 viewport.prepend(smartScroll);
             }
@@ -71,19 +81,25 @@ export class FlexDataRowRenderer implements IGridRenderer {
         this.updateViewportRows(renderOptions);
     }
 
-    updateViewportRowsDown(renderOptions: any): void {
+    updateViewportRowsDown(renderOptions: DataRowRenderOptions): void {
         this.updateViewportRows(renderOptions);
     }
 
-    renderNewRows(data: any[]) {
+    renderNewRows(renderOptions?: DataRowRenderOptions): string {
         let rowTemplate = '';
-        if(data && data.length > 0) {
-            data.forEach(dataRow => {
+        const rows = renderOptions?.data || [];
+
+        if(rows.length > 0) {
+            rows.forEach((dataRow: any, index: number) => {
                 let colTemplate = '';
+                const isSelected = renderOptions?.isRowSelected ? renderOptions.isRowSelected(dataRow) : false;
+                if (renderOptions?.enableRowSelection) {
+                    colTemplate += this.selectionCellTemplateFragmentFn(isSelected);
+                }
                 this._renderCols.forEach(col => {
                     colTemplate += this.cellTemplateFragmentFn(col.field, dataRow);
                 });
-                rowTemplate += this.rowTemplateFragmentFn(colTemplate).outerHTML;
+                rowTemplate += this.rowTemplateFragmentFn(colTemplate, index, isSelected).outerHTML;
             });
         }
 
@@ -96,6 +112,16 @@ export class FlexDataRowRenderer implements IGridRenderer {
      */
     queueRender(): Promise<HTMLElement> {
         return Promise.resolve(this.render());
+    }
+
+    /**
+     * Selection cell template fragment.
+     * @param isSelected whether row is selected.
+     * @returns selection cell markup.
+     */
+    private selectionCellTemplateFragmentFn(isSelected: boolean): string {
+        const checkedAttribute = isSelected ? ' checked' : '';
+        return `<div class="cell-column selection-column"><div class="cell-content selection-cell-content"><input type="checkbox" class="row-select-checkbox" aria-label="Select row"${checkedAttribute}></div></div>`;
     }
 
     /**
@@ -115,9 +141,13 @@ export class FlexDataRowRenderer implements IGridRenderer {
      * @param cellTemplate cell template string.
      * @returns template fragment method.
      */
-    private rowTemplateFragmentFn(cellTemplate: string): HTMLElement {
+    private rowTemplateFragmentFn(cellTemplate: string, rowIndex: number, isSelected: boolean): HTMLElement {
         const dataRowContainer = document.createElement('div');
         dataRowContainer.classList.add('data-row');
+        if (isSelected) {
+            dataRowContainer.classList.add('selected-row');
+        }
+        dataRowContainer.dataset.rowIndex = rowIndex.toString();
         dataRowContainer.innerHTML = cellTemplate;
         return dataRowContainer;
     }

@@ -14,6 +14,12 @@
             <div class="input-group-append ml-2">
                 <button class="btn btn-outline-secondary" type="button" data-bind="click: exportToCsv.bind($data)">Export CSV</button>
             </div>
+            <div class="input-group-append ml-2">
+                <div class="input-group-text">
+                    <input checked type="checkbox" aria-label="Enable row selection" data-bind="event: { change: onRowSelectionToggleChange.bind($data) }" />
+                    <span class="ml-2">Enable Row Selection</span>
+                </div>
+            </div>
         </div>
     </div>
     <div class="col-12">
