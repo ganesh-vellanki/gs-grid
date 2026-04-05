@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-12">
-        <h3>What & Why</h3>
+        <h3>Why</h3>
     </div>
 </div>
 
@@ -24,8 +24,10 @@
                 <h5 class="card-title text-primary">What It Gives You</h5>
                 <ul class="mb-0">
                     <li>Custom-element grid tag: <code>&lt;gs-grid&gt;</code></li>
-                    <li>Column definitions with flexible width options</li>
+                    <li>Column definitions with auto, fixed, percent, and flexible width options</li>
                     <li>Configurable row height and nested field access (e.g. <code>company.name</code>)</li>
+                    <li>Built-in column sorting with ascending, descending, and reset states</li>
+                    <li>Optional row selection with header select-all, indeterminate state, and selected-row access</li>
                     <li>Shadow DOM style isolation for predictable rendering</li>
                 </ul>
             </div>
@@ -40,7 +42,38 @@
                     <li>Event-driven setup keeps usage straightforward</li>
                     <li>Virtualized row rendering keeps large datasets responsive</li>
                     <li>Custom smart scroll behavior supports drag, click, and wheel</li>
+                    <li>Convenience APIs make search, export, and selection easy to trigger at runtime</li>
                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h5>Available Features</h5>
+        <div class="alert alert-light border mb-0" role="alert">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <ul class="mb-0">
+                        <li>Framework-agnostic Web Component usage</li>
+                        <li>Column definitions with nested-field support</li>
+                        <li>Per-column sorting with visual header indicators</li>
+                        <li>Global search across all configured fields</li>
+                        <li>CSV export from the current grid dataset</li>
+                        <li>Excel export from the current grid dataset</li>
+                    </ul>
+                </div>
+                <div class="col-12 col-md-6 mt-3 mt-md-0">
+                    <ul class="mb-0">
+                        <li>Virtualized rendering with viewport-based row windows</li>
+                        <li>Custom smart scrollbar with drag, click, and wheel behavior</li>
+                        <li>Responsive viewport height recalculation on resize</li>
+                        <li>Optional row selection with row checkboxes and header checkbox</li>
+                        <li>Async row-selection change callback support</li>
+                        <li>Runtime APIs to search, export, read selected rows, update data, and enable or disable row selection</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -51,10 +84,10 @@
         <h5>How It Works</h5>
         <ol class="mb-0">
             <li>Render <code>&lt;gs-grid&gt;</code> in your page.</li>
-            <li>Create a <code>GridConfig</code> with <code>columnDefs</code>, <code>rowHeight</code>, and <code>data</code>.</li>
+            <li>Create a <code>GridConfig</code> with <code>columnDefs</code>, <code>rowHeight</code>, <code>data</code>, and optional features like <code>enableRowSelection</code>.</li>
             <li>Dispatch configuration using <code>GridEvents.setupGridConfig(instanceId, config)</code>.</li>
-            <li>The component renders header, viewport rows, and custom scrollbar inside Shadow DOM.</li>
-            <li>Scroll position is mapped to virtual row windows for efficient updates.</li>
+            <li>The component renders header, viewport rows, selection UI, and custom scrollbar inside Shadow DOM.</li>
+            <li>Scroll position is mapped to virtual row windows for efficient updates, while search, sort, export, and selection APIs remain available at runtime.</li>
         </ol>
     </div>
 </div>
@@ -65,8 +98,9 @@
         <p class="mb-2">gs-grid is currently a strong fit for:</p>
         <ul class="mb-0">
             <li>Internal tools and dashboards</li>
+            <li>Data-heavy pages that need virtualization without a large grid dependency</li>
             <li>Apps that need a custom-grid experience without heavy dependencies</li>
-            <li>Teams that want to evolve grid features incrementally</li>
+            <li>Teams that want a framework-agnostic grid with runtime APIs for search, export, and selection</li>
         </ul>
     </div>
 </div>
@@ -82,9 +116,11 @@
             <h6 class="mb-2">Highlights</h6>
             <ul class="mb-0">
                 <li>Virtual scrolling behavior improved with better position mapping and grid height calculation.</li>
+                <li>Row selection support added with row checkboxes, header select-all, indeterminate state, and runtime enable or disable control.</li>
+                <li>Convenience grid APIs now cover search, export, selected-row retrieval, and row-selection toggling.</li>
                 <li>Example/demo app expanded with updated docs routes and refreshed navigation links.</li>
                 <li>Demo data setup improved, including higher row volume and column width examples.</li>
-                <li>Core grid rendering and scroll/virtualization integration matured across multiple updates.</li>
+                <li>Core grid rendering, sorting, export, search, and scroll/virtualization integration matured across multiple updates.</li>
             </ul>
         </div>
     </div>
