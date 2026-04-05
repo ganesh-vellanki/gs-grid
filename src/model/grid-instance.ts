@@ -2,6 +2,8 @@ import { IGridInstance } from "../interface";
 
 export interface GridInstanceHandlers {
     updateData?: (data: any[]) => Promise<boolean>;
+    getSelectedRows?: () => any[];
+    setRowSelectionEnabled?: (enabled: boolean) => Promise<boolean>;
     performSearch?: (query: string) => Promise<boolean>;
     clearSearch?: () => Promise<boolean>;
     exportToExcel?: (fileName?: string) => Promise<boolean>;
@@ -31,6 +33,22 @@ export class GridInstance implements IGridInstance {
     updateData(data: any[]): Promise<boolean> {
         if (this.handlers.updateData) {
             return this.handlers.updateData(data);
+        }
+
+        return Promise.resolve(false);
+    }
+
+    getSelectedRows(): any[] {
+        if (this.handlers.getSelectedRows) {
+            return this.handlers.getSelectedRows();
+        }
+
+        return [];
+    }
+
+    setRowSelectionEnabled(enabled: boolean): Promise<boolean> {
+        if (this.handlers.setRowSelectionEnabled) {
+            return this.handlers.setRowSelectionEnabled(enabled);
         }
 
         return Promise.resolve(false);

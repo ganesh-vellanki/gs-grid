@@ -2,9 +2,12 @@ import * as gsGrid from '../../../../src';
 import { IGridColumn } from '../../../../src/interface';
 import { GridConfig, GridEvents } from '../../../../src/model';
 
+declare const require: any;
+
 class DemoHome {
     usersList: any[] = [];
-    gridConfig: GridConfig<any>;
+    gridConfig!: GridConfig<any>;
+    rowSelectionEnabled: boolean = true;
 
     constructor() {
         const gsGridRef = gsGrid;
@@ -66,12 +69,24 @@ class DemoHome {
         this.gridConfig = new GridConfig();
         this.gridConfig.columnDefs = this.buildGridColumns();
         this.gridConfig.rowHeight = 31;
+        this.gridConfig.enableRowSelection = this.rowSelectionEnabled;
 
         this.gridConfig.data = await this.getUsers();
         const gridEl = document.querySelector('gs-grid');
-        if (gridEl) {
-            GridEvents.setupGridConfig(gridEl.getAttribute('instance-id'), this.gridConfig);
+        const instanceId = gridEl ? gridEl.getAttribute('instance-id') : null;
+        if (gridEl && instanceId) {
+            GridEvents.setupGridConfig(instanceId, this.gridConfig);
         }
+    }
+
+    async onRowSelectionToggleChange(_: any, event: Event) {
+        if (!this.gridConfig || !this.gridConfig.instance) {
+            return;
+        }
+
+        const target = event.target as HTMLInputElement;
+        this.rowSelectionEnabled = !!(target && target.checked);
+        await this.gridConfig.instance.setRowSelectionEnabled(this.rowSelectionEnabled);
     }
 
     async onSearchInput(_: any, event: Event) {

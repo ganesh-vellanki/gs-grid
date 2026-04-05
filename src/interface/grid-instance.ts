@@ -3,6 +3,8 @@ export interface IGridInstance {
     refreshGrid(delay?: number): Promise<boolean>;
     rebuildGrid(force: boolean): Promise<boolean>;
     updateData(data: any[]): Promise<boolean>;
+    getSelectedRows(): any[];
+    setRowSelectionEnabled(enabled: boolean): Promise<boolean>;
     performSearch(query: string): Promise<boolean>;
     clearSearch(): Promise<boolean>;
     exportToExcel(fileName?: string): Promise<boolean>;

@@ -8,11 +8,17 @@
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" data-bind="click: clearSearch.bind($data)">Clear</button>
             </div>
-            <div class="input-group-append ml-2">
+            <div class="input-group-append mx-2">
                 <button class="btn btn-outline-secondary" type="button" data-bind="click: exportToExcel.bind($data)">Export Excel</button>
             </div>
-            <div class="input-group-append ml-2">
+            <div class="input-group-append mx-2">
                 <button class="btn btn-outline-secondary" type="button" data-bind="click: exportToCsv.bind($data)">Export CSV</button>
+            </div>
+            <div class="form-check mx-2 my-2">
+                <input class="form-check-input" type="checkbox" value="" id="checkDefault" data-bind="event: { change: onRowSelectionToggleChange.bind($data) }" >
+                <label class="form-check-label" for="checkDefault">
+                    Enable row selection
+                </label>
             </div>
         </div>
     </div>

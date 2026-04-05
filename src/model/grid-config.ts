@@ -1,4 +1,5 @@
 import { IGridConfig, IGridColumn, IGridInstance } from "../interface";
+import { RowSelectionChangeHandler } from "../core";
 import {Observable, Subject, BehaviorSubject} from 'rxjs';
 
 /**
@@ -8,7 +9,7 @@ export class GridConfig<T> implements IGridConfig {
     /**
      * Is grid instance ready.
      */
-    private instanceReady: boolean;
+    private instanceReady!: boolean;
 
     /**
      * Render complete subscription of grid config.
@@ -18,7 +19,7 @@ export class GridConfig<T> implements IGridConfig {
     /**
      * Column defs of grid config
      */
-    columnDefs: IGridColumn[];
+    columnDefs!: IGridColumn[];
 
     /**
      * Row height of grid config.
@@ -28,12 +29,17 @@ export class GridConfig<T> implements IGridConfig {
     /**
      * Instance  of grid config
      */
-    instance: IGridInstance;
+    instance!: IGridInstance;
 
     /**
      * Data of grid config
      */
     data?: T[];
+
+    /**
+     * Enables row selection feature.
+     */
+    enableRowSelection?: boolean;
 
     /**
      * Convenience API for global search across grid columns.
@@ -56,11 +62,17 @@ export class GridConfig<T> implements IGridConfig {
     exportToCsv?: (fileName?: string) => Promise<boolean>;
 
     /**
+     * Async callback invoked when row selection changes.
+     */
+    onRowSelectionChangeAsync?: RowSelectionChangeHandler;
+
+    /**
      * Creates an instance of grid config.
      */
     constructor(){
         this.renderCompleteSubscription = new BehaviorSubject(false);
         this.rowHeight = 40;
+        this.enableRowSelection = false;
     }
 
     /**

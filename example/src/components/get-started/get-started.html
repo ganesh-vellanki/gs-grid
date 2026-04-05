@@ -1,70 +1,247 @@
 <div class="row">
     <div class="col-12">
         <h3>Get started</h3>
+        <p class="text-muted mb-0">Set up <span class="text-primary">gs-grid</span>, configure columns and data, and wire the component into your page with the runtime APIs that are available today.</p>
+    </div>
+</div>
+
+<div class="row mt-4 g-3">
+    <div class="col-12 col-lg-5">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Prerequisites</h5>
+                <p class="text-muted small mb-3">Before mounting the grid, make sure your environment can compile the package and run Web Components.</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">Node.js 14+ and Yarn 1.x</li>
+                    <li class="list-group-item px-0">A browser with Web Components support</li>
+                    <li class="list-group-item px-0">Basic familiarity with custom elements and standard DOM access</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-7">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Run locally</h5>
+                <p class="text-muted">The local demo site builds the library, generates docs, and serves the example app so you can validate configuration changes quickly.</p>
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <div class="border rounded p-3 h-100 bg-light">
+                            <div class="fw-semibold mb-1">1. Install</div>
+                            <p class="small text-muted mb-0">Pull all dependencies required for the grid, docs, and example app.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="border rounded p-3 h-100 bg-light">
+                            <div class="fw-semibold mb-1">2. Build</div>
+                            <p class="small text-muted mb-0">Compile the library and generate the latest documentation output.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="border rounded p-3 h-100 bg-light">
+                            <div class="fw-semibold mb-1">3. Serve</div>
+                            <p class="small text-muted mb-0">Start the demo so you can verify the configuration and runtime APIs visually.</p>
+                        </div>
+                    </div>
+                </div>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mt-3 mb-0"><code class="text-warning">yarn install
+yarn start</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 g-3">
+    <div class="col-12 col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">1. Install in your app</h5>
+                <p class="text-muted">Install the package first, then import the component and model helpers in the part of your app where the grid is initialized.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-warning">yarn add @gs-grid/gs-grid</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-8">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">2. Render the grid element</h5>
+                <p class="text-muted">Render the custom element wherever you want the grid to appear. The component receives its runtime configuration after it mounts and exposes its generated <code>instance-id</code>.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">&lt;gs-grid&gt;&lt;/gs-grid&gt;</code></pre>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row mt-4">
     <div class="col-12">
-        <h5>Prerequisites</h5>
-        <ul>
-            <li>Node.js 14+ and Yarn 1.x</li>
-            <li>A browser with Web Components support</li>
-        </ul>
+        <h5>3. Configure the grid step by step</h5>
+        <p class="text-muted">Instead of one large code block, the setup below is split into smaller pieces so each part of the configuration is easier to understand.</p>
     </div>
 </div>
 
-<div class="row mt-3">
-    <div class="col-12">
-        <h5>Run locally</h5>
-        <ol>
-            <li>Install dependencies</li>
-            <li>Build source and docs</li>
-            <li>Start demo server</li>
-        </ol>
-        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-warning">yarn install
-yarn start</code></pre>
+<div class="row g-3 mt-1">
+    <div class="col-12 col-xl-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Step A: Import the component and helpers</h6>
+                <p class="text-muted mb-3">Import the custom element once so the browser can register <code>&lt;gs-grid&gt;</code>. Then import the model helpers used to build and dispatch the runtime configuration.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">import '@gs-grid/gs-grid';
+import { GridConfig, GridEvents } from '@gs-grid/gs-grid/dist/model';</code></pre>
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="row mt-3">
-    <div class="col-12">
-        <h5>Install in your app</h5>
-        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-warning">yarn add @gs-grid/gs-grid</code></pre>
-    </div>
-</div>
-
-<div class="row mt-3">
-    <div class="col-12">
-        <h5>Add grid element</h5>
-        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-info">&lt;gs-grid&gt;&lt;/gs-grid&gt;</code></pre>
-    </div>
-</div>
-
-<div class="row mt-3">
-    <div class="col-12">
-        <h5>Configure columns and data</h5>
-        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-info">import { GridConfig, GridEvents } from '@gs-grid/gs-grid/dist/model';
-
-const gridConfig = new GridConfig();
+    <div class="col-12 col-xl-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Step B: Create the base config</h6>
+                <p class="text-muted mb-3">Start with a new <code>GridConfig</code>. This is where you define row height, optional row-selection support, and the rest of the runtime behavior for the grid instance.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">const gridConfig = new GridConfig();
 gridConfig.rowHeight = 32;
-gridConfig.columnDefs = [
-  { field: 'name', headerName: 'Name' },
-  { field: 'email', headerName: 'Email' },
-  { field: 'company.name', headerName: 'Company', width: 180 }
-];
-gridConfig.data = data;
+gridConfig.enableRowSelection = true;</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Step C: Define columns</h6>
+                <p class="text-muted mb-3">Each column controls which field is rendered, what text appears in the header, whether sorting is enabled, and how width should be allocated. Nested values can be read with dot notation such as <code>company.name</code>.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">gridConfig.columnDefs = [
+    {
+        field: 'name',
+        headerName: 'Name',
+        enableSort: true,
+        width: 180
+    },
+    {
+        field: 'email',
+        headerName: 'Email',
+        enableSort: true,
+        width: '30%'
+    },
+    {
+        field: 'company.name',
+        headerName: 'Company',
+        enableSort: true,
+        width: 180
+    },
+    {
+        field: 'status',
+        headerName: 'Status',
+        width: 120
+    }
+];</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Step D: Provide row data</h6>
+                <p class="text-muted mb-3">Assign any array of plain objects. The field names from <code>columnDefs</code> are resolved against each row, including nested objects.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">gridConfig.data = [
+    {
+        name: 'Ava Patel',
+        email: 'ava@example.com',
+        company: { name: 'Northwind' },
+        status: 'Active'
+    },
+    {
+        name: 'Lucas Reed',
+        email: 'lucas@example.com',
+        company: { name: 'Contoso' },
+        status: 'Pending'
+    }
+];</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Step E: Listen for selection changes</h6>
+                <p class="text-muted mb-3">If row selection is enabled, you can register an async callback to receive the full selected-row list and the row that triggered the latest change.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">gridConfig.onRowSelectionChangeAsync = async (selectedRows, currentRow) =&gt; {
+    console.log('selected rows', selectedRows);
+    console.log('current row', currentRow);
+};</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Step F: Attach the config to the rendered element</h6>
+                <p class="text-muted mb-3">After the element is in the DOM, read its generated <code>instance-id</code> and dispatch the config through <code>GridEvents.setupGridConfig(...)</code>. That is what activates the grid.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">const gridEl = document.querySelector('gs-grid');
+const instanceId = gridEl?.getAttribute('instance-id');
 
-const gridEl = document.querySelector('gs-grid');
-GridEvents.setupGridConfig(gridEl.getAttribute('instance-id'), gridConfig);</code></pre>
+if (gridEl &amp;&amp; instanceId) {
+    GridEvents.setupGridConfig(instanceId, gridConfig);
+}</code></pre>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="row mt-3 mb-4">
+<div class="row mt-4">
     <div class="col-12">
-        <h5>Useful scripts</h5>
-        <pre class="bg-dark text-light rounded p-3 border border-secondary"><code class="text-warning">yarn build
+        <h5>4. Use runtime APIs</h5>
+        <p class="text-muted">Once the grid is configured, you can trigger common operations without reconstructing the component. These APIs are useful for search boxes, toolbar buttons, export actions, and row-selection controls.</p>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Search</h6>
+                <p class="text-muted small">Search across all configured fields, then clear the active query when needed.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">await gridConfig.performSearch?.('northwind');
+await gridConfig.clearSearch?.();</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Export</h6>
+                <p class="text-muted small">Export the current grid dataset to CSV or Excel directly from the bound runtime helpers.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">await gridConfig.exportToCsv?.('customers');
+await gridConfig.exportToExcel?.('customers');</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Read selection</h6>
+                <p class="text-muted small">Access the current selection at any time through the grid instance API.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">const selectedRows = gridConfig.instance.getSelectedRows();</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-primary">Toggle selection</h6>
+                <p class="text-muted small">Enable or disable row-selection controls at runtime without rebuilding the grid.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-info">await gridConfig.instance.setRowSelectionEnabled(false);</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Useful scripts</h5>
+                <p class="text-muted">These are the main commands used during local development.</p>
+                <pre class="bg-dark text-light rounded p-3 border border-secondary mb-0"><code class="text-warning">yarn build
 yarn dev
 yarn clean</code></pre>
+            </div>
+        </div>
     </div>
 </div>

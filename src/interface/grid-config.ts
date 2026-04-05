@@ -1,5 +1,6 @@
 import { Observable } from "rxjs";
 import { IGridColumn, IGridInstance } from ".";
+import { RowSelectionChangeHandler } from "../core";
 
 /**
  * Grid config interface.
@@ -38,6 +39,11 @@ export interface IGridConfig {
     data?: any[];
 
     /**
+     * Enables row selection feature.
+     */
+    enableRowSelection?: boolean;
+
+    /**
      * Convenience API for global search across grid columns.
      */
     performSearch?: (query: string) => Promise<boolean>;
@@ -56,4 +62,9 @@ export interface IGridConfig {
      * Convenience API to export current grid data to CSV.
      */
     exportToCsv?: (fileName?: string) => Promise<boolean>;
+
+    /**
+     * Async callback invoked when row selection changes.
+     */
+    onRowSelectionChangeAsync?: RowSelectionChangeHandler;
 }

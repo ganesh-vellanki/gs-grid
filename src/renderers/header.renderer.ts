@@ -1,6 +1,11 @@
 import { CellUtilities } from "../core";
 import { ICellConfig, IGridConfig, IGridRenderColumn, IGridRenderer } from "../interface";
 
+interface HeaderRenderOptions {
+    enableRowSelection?: boolean;
+    isAllSelected?: boolean;
+}
+
 /**
  * Flex header renderer.
  */
@@ -36,10 +41,13 @@ export class FlexHeaderRenderer implements IGridRenderer {
     /**
      * Renders flex header renderer.
      */
-    render(): HTMLElement {
+    render(renderOptions?: HeaderRenderOptions): HTMLElement {
         const cellConfigItems: ICellConfig[] = this._renderCols.map(c => { return {field: c.field, width: c.width, renderWidth: ''}});
         this._cellUtils.computeCellEssentials(cellConfigItems, true);
         let colTemplate = '';
+        if (renderOptions?.enableRowSelection) {
+            colTemplate += this.selectionCellTemplateFragmentFn(!!renderOptions?.isAllSelected);
+        }
         this._renderCols.forEach(col => {
             colTemplate += this.cellTemplateFragmentFn(col.displayName, col.field);
         });
@@ -53,6 +61,16 @@ export class FlexHeaderRenderer implements IGridRenderer {
      */
     async queueRender(): Promise<HTMLElement> {
         return await Promise.resolve(this.render());
+    }
+
+    /**
+     * Selection header cell template.
+     * @param isAllSelected whether active rows are fully selected.
+     * @returns selection cell markup.
+     */
+    private selectionCellTemplateFragmentFn(isAllSelected: boolean): string {
+        const checkedAttribute = isAllSelected ? ' checked' : '';
+        return `<div class="header-column selection-column"><div class="cell-content selection-cell-content"><input type="checkbox" class="header-select-checkbox" aria-label="Select all rows"${checkedAttribute}></div></div>`;
     }
 
     /**
